@@ -17,7 +17,8 @@
 		F54807791743C6AE00F5C172 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F54807781743C6AE00F5C172 /* Default@2x.png */; };
 		F548077B1743C6AE00F5C172 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F548077A1743C6AE00F5C172 /* Default-568h@2x.png */; };
 		F548077E1743C6AE00F5C172 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F548077C1743C6AE00F5C172 /* MainStoryboard.storyboard */; };
-		F54807811743C6AE00F5C172 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F54807801743C6AE00F5C172 /* ViewController.m */; };
+		F54807811743C6AE00F5C172 /* UIVIiew+MHValidation.m in Sources */ = {isa = PBXBuildFile; fileRef = F54807801743C6AE00F5C172 /* UIVIiew+MHValidation.m */; };
+		F54807901743DEEC00F5C172 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F548078F1743DEEC00F5C172 /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,8 +36,9 @@
 		F54807781743C6AE00F5C172 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		F548077A1743C6AE00F5C172 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		F548077D1743C6AE00F5C172 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
-		F548077F1743C6AE00F5C172 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		F54807801743C6AE00F5C172 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		F548077F1743C6AE00F5C172 /* UIVIiew+MHValidation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIVIiew+MHValidation.h"; sourceTree = "<group>"; };
+		F54807801743C6AE00F5C172 /* UIVIiew+MHValidation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIVIiew+MHValidation.m"; sourceTree = "<group>"; };
+		F548078F1743DEEC00F5C172 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F54807901743DEEC00F5C172 /* QuartzCore.framework in Frameworks */,
 				F54807651743C6AE00F5C172 /* UIKit.framework in Frameworks */,
 				F54807671743C6AE00F5C172 /* Foundation.framework in Frameworks */,
 				F54807691743C6AE00F5C172 /* CoreGraphics.framework in Frameworks */,
@@ -73,6 +76,7 @@
 		F54807631743C6AE00F5C172 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F548078F1743DEEC00F5C172 /* QuartzCore.framework */,
 				F54807641743C6AE00F5C172 /* UIKit.framework */,
 				F54807661743C6AE00F5C172 /* Foundation.framework */,
 				F54807681743C6AE00F5C172 /* CoreGraphics.framework */,
@@ -86,8 +90,8 @@
 				F54807731743C6AE00F5C172 /* AppDelegate.h */,
 				F54807741743C6AE00F5C172 /* AppDelegate.m */,
 				F548077C1743C6AE00F5C172 /* MainStoryboard.storyboard */,
-				F548077F1743C6AE00F5C172 /* ViewController.h */,
-				F54807801743C6AE00F5C172 /* ViewController.m */,
+				F548077F1743C6AE00F5C172 /* UIVIiew+MHValidation.h */,
+				F54807801743C6AE00F5C172 /* UIVIiew+MHValidation.m */,
 				F548076B1743C6AE00F5C172 /* Supporting Files */,
 			);
 			path = MHValidationViewController;
@@ -175,7 +179,7 @@
 			files = (
 				F54807711743C6AE00F5C172 /* main.m in Sources */,
 				F54807751743C6AE00F5C172 /* AppDelegate.m in Sources */,
-				F54807811743C6AE00F5C172 /* ViewController.m in Sources */,
+				F54807811743C6AE00F5C172 /* UIVIiew+MHValidation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +302,7 @@
 				F54807861743C6AE00F5C172 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
