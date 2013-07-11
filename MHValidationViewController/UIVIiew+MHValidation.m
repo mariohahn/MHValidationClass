@@ -51,19 +51,20 @@ static NSString * const MHValidationOnlyNumbers = @"[0-9]+";
  
  */
 
--(void)selectFieldOnView:(id)view withSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType{
+
+-(void)selectFieldOnView:(id)view withSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock{
+    
     NSArray *textFields = [self findObjectsofClass:classes onView:view andShowOnlyNonHiddenObjects:YES];
     NSComparator comparatorBlock = ^(id obj1, id obj2) {
         if ([obj1 frame].origin.y > [obj2 frame].origin.y) {
             return (NSComparisonResult)NSOrderedDescending;
         }
-        
         if ([obj1 frame].origin.y < [obj2 frame].origin.y) {
             return (NSComparisonResult)NSOrderedAscending;
         }
         return (NSComparisonResult)NSOrderedSame;
     };
-    id objectWhichShouldBecomeFirstResponder;
+    id objectWhichShouldBecomeFirstResponder= nil;
     
     NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:textFields];
     [fieldsSort sortUsingComparator:comparatorBlock];
@@ -77,18 +78,29 @@ static NSString * const MHValidationOnlyNumbers = @"[0-9]+";
             break;
         }
     }
-    if (selectionType == MHSelectionTypeNext) {
-        [objectWhichShouldBecomeFirstResponder becomeFirstResponder];
+    if (selectionType == MHSelectionTypeNext ) {
+        if (objectWhichShouldBecomeFirstResponder) {
+            FoundObjectBlock(objectWhichShouldBecomeFirstResponder,MHSelectedObjectTypeMiddle);
+        }
     }else{
         int index = [fieldsSort indexOfObject:objectWhichShouldBecomeFirstResponder];
         if (index>=2) {
-            [[fieldsSort objectAtIndex:index-2]becomeFirstResponder];
+            if (index == NSNotFound && [selectedObject isFirstResponder ]) {
+                FoundObjectBlock(objectWhichShouldBecomeFirstResponder,MHSelectedObjectTypeFirst);
+            }else{
+                FoundObjectBlock(objectWhichShouldBecomeFirstResponder,MHSelectedObjectTypeMiddle);
+            }
+        }else{
+            FoundObjectBlock(objectWhichShouldBecomeFirstResponder,MHSelectedObjectTypeFirst);
+            
         }
     }
-    if ([selectedObject isFirstResponder]) {
-        [selectedObject resignFirstResponder];
+    if ([selectedObject isFirstResponder] && selectionType == MHSelectionTypeNext) {
+        FoundObjectBlock(nil,MHSelectedObjectTypeLast);
     }
 }
+
+
 
 
 
@@ -196,9 +208,12 @@ static NSString * const MHValidationOnlyNumbers = @"[0-9]+";
     return fields;
 }
 
-- (void)shakeObjects:(id)objects {
+- (void)shakeObjects:(id)objects andChangeBorderColor:(UIColor*)borderColor{
     for (id object in objects){
         CALayer *layer = [object layer];
+        if (borderColor) {
+            [layer setBorderColor:[borderColor CGColor]];
+        }
         CGPoint pos = layer.position;
         static int numberOfShakes = 4;
         CAKeyframeAnimation *shakeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
