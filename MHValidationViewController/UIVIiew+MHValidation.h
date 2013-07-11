@@ -8,6 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+
+typedef NS_ENUM(NSUInteger, MHSelectionType) {
+    MHSelectionTypeNext,
+    MHSelectionTypePrev
+};
+
 @interface MHValidationItem : NSObject
 @property (nonatomic, strong) id object;
 @property (nonatomic,strong) NSString *regexString;

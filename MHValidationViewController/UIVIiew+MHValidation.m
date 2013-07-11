@@ -51,6 +51,47 @@ static NSString * const MHValidationOnlyNumbers = @"[0-9]+";
  
  */
 
+-(void)selectFieldOnView:(id)view withSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType{
+    NSArray *textFields = [self findObjectsofClass:classes onView:view andShowOnlyNonHiddenObjects:YES];
+    NSComparator comparatorBlock = ^(id obj1, id obj2) {
+        if ([obj1 frame].origin.y > [obj2 frame].origin.y) {
+            return (NSComparisonResult)NSOrderedDescending;
+        }
+        
+        if ([obj1 frame].origin.y < [obj2 frame].origin.y) {
+            return (NSComparisonResult)NSOrderedAscending;
+        }
+        return (NSComparisonResult)NSOrderedSame;
+    };
+    id objectWhichShouldBecomeFirstResponder;
+    
+    NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:textFields];
+    [fieldsSort sortUsingComparator:comparatorBlock];
+    for (id viewsAndFields in fieldsSort) {
+        if (([viewsAndFields frame].origin.y == [selectedObject frame].origin.y)&&([viewsAndFields frame].origin.x > [selectedObject frame].origin.x) ) {
+            objectWhichShouldBecomeFirstResponder = viewsAndFields;
+            break;
+        }
+        if (([viewsAndFields frame].origin.y > [selectedObject frame].origin.y) ) {
+            objectWhichShouldBecomeFirstResponder = viewsAndFields;
+            break;
+        }
+    }
+    if (selectionType == MHSelectionTypeNext) {
+        [objectWhichShouldBecomeFirstResponder becomeFirstResponder];
+    }else{
+        int index = [fieldsSort indexOfObject:objectWhichShouldBecomeFirstResponder];
+        if (index>=2) {
+            [[fieldsSort objectAtIndex:index-2]becomeFirstResponder];
+        }
+    }
+    if ([selectedObject isFirstResponder]) {
+        [selectedObject resignFirstResponder];
+    }
+}
+
+
+
 -(void)validateObjectOfClass:(NSArray*)class onView:(UIView*)view andNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithRegex:(NSArray*)regexObject andSwitchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock{
     
     NSArray *fields = [self findObjectsofClass:class onView:view andShowOnlyNonHiddenObjects:YES];
