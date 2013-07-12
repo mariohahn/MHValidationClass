@@ -19,6 +19,7 @@
 		F548077E1743C6AE00F5C172 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F548077C1743C6AE00F5C172 /* MainStoryboard.storyboard */; };
 		F54807811743C6AE00F5C172 /* UIVIiew+MHValidation.m in Sources */ = {isa = PBXBuildFile; fileRef = F54807801743C6AE00F5C172 /* UIVIiew+MHValidation.m */; };
 		F54807901743DEEC00F5C172 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F548078F1743DEEC00F5C172 /* QuartzCore.framework */; };
+		F54AA357178FF64F00126134 /* ValidationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F54AA356178FF64F00126134 /* ValidationViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,8 @@
 		F548077F1743C6AE00F5C172 /* UIVIiew+MHValidation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIVIiew+MHValidation.h"; sourceTree = "<group>"; };
 		F54807801743C6AE00F5C172 /* UIVIiew+MHValidation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIVIiew+MHValidation.m"; sourceTree = "<group>"; };
 		F548078F1743DEEC00F5C172 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		F54AA355178FF64F00126134 /* ValidationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ValidationViewController.h; sourceTree = "<group>"; };
+		F54AA356178FF64F00126134 /* ValidationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ValidationViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +95,8 @@
 				F548077C1743C6AE00F5C172 /* MainStoryboard.storyboard */,
 				F548077F1743C6AE00F5C172 /* UIVIiew+MHValidation.h */,
 				F54807801743C6AE00F5C172 /* UIVIiew+MHValidation.m */,
+				F54AA355178FF64F00126134 /* ValidationViewController.h */,
+				F54AA356178FF64F00126134 /* ValidationViewController.m */,
 				F548076B1743C6AE00F5C172 /* Supporting Files */,
 			);
 			path = MHValidationViewController;
@@ -180,6 +185,7 @@
 				F54807711743C6AE00F5C172 /* main.m in Sources */,
 				F54807751743C6AE00F5C172 /* AppDelegate.m in Sources */,
 				F54807811743C6AE00F5C172 /* UIVIiew+MHValidation.m in Sources */,
+				F54AA357178FF64F00126134 /* ValidationViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

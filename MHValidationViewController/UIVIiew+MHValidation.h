@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+
+static NSString * const MHValidationRegexEmail = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+static NSString * const MHValidationRegexOnlyNumbers = @"[0-9]+";
+
 typedef NS_ENUM(NSUInteger, MHSelectedObjectType) {
     MHSelectedObjectTypeFirst,
     MHSelectedObjectTypeLast,
@@ -29,9 +33,9 @@ typedef NS_ENUM(NSUInteger, MHSelectionType) {
 
 @interface UIView (MHValidation)
 
--(void)selectFieldOnView:(id)view withSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock;
+-(void)selectFieldWithSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock;
 
--(void)validateObjectOfClass:(NSArray*)class onView:(UIView*)view andNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithRegex:(NSArray*)regexObject andSwitchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock;
+-(void)validateObjectOfClass:(NSArray*)classes withNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithMHRegexObjects:(NSArray*)regexObject andSwitchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock;
 
 - (void)shakeObjects:(id)objects andChangeBorderColor:(UIColor*)borderColor;
 

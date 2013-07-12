@@ -9,9 +9,6 @@
 #import "UIVIiew+MHValidation.h"
 #import <QuartzCore/QuartzCore.h>
 
-static NSString * const MHValidationEmail = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
-static NSString * const MHValidationOnlyNumbers = @"[0-9]+";
-
 @implementation MHValidationItem
 
 -(id)initWithObject:(id)object andRegexString:(NSString *)regexString{
@@ -52,9 +49,11 @@ static NSString * const MHValidationOnlyNumbers = @"[0-9]+";
  */
 
 
--(void)selectFieldOnView:(id)view withSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock{
+
+
+-(void)selectFieldWithSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock{
     
-    NSArray *textFields = [self findObjectsofClass:classes onView:view andShowOnlyNonHiddenObjects:YES];
+    NSArray *textFields = [self findObjectsofClass:classes onView:self andShowOnlyNonHiddenObjects:YES];
     NSComparator comparatorBlock = ^(id obj1, id obj2) {
         if ([obj1 frame].origin.y > [obj2 frame].origin.y) {
             return (NSComparisonResult)NSOrderedDescending;
@@ -104,9 +103,9 @@ static NSString * const MHValidationOnlyNumbers = @"[0-9]+";
 
 
 
--(void)validateObjectOfClass:(NSArray*)class onView:(UIView*)view andNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithRegex:(NSArray*)regexObject andSwitchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock{
+-(void)validateObjectOfClass:(NSArray*)classes withNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithMHRegexObjects:(NSArray*)regexObject andSwitchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock{
     
-    NSArray *fields = [self findObjectsofClass:class onView:view andShowOnlyNonHiddenObjects:YES];
+    NSArray *fields = [self findObjectsofClass:classes onView:self andShowOnlyNonHiddenObjects:YES];
     NSMutableArray *curruptFields = [NSMutableArray new];
     [fields enumerateObjectsUsingBlock:^(id field, NSUInteger idx, BOOL *stop) {
         if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
