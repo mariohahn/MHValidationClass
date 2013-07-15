@@ -27,8 +27,12 @@
     self.PLZ.accessibilityIdentifier = @"Postleitzahl";
     self.userName.accessibilityIdentifier = @"Username";
     self.passwort.accessibilityIdentifier = @"Passwort";
-
+    
+    
     [self.scrollView initMHValidationWithClassObjectsToValidate:@[[UITextField class]]];
+    [self.scrollView setShouldShowNextPrevWithToolbar:NO];
+    
+    
 }
 
 -(void)validateButtonAction{

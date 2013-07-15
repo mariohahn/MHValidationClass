@@ -30,6 +30,24 @@ NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
 
 @implementation UIView (MHValidation)
 @dynamic classObjects;
+@dynamic shouldShowNextPrevWithToolbar;
+
+
+
+-(void)setShouldShowNextPrevWithToolbar:(BOOL)shouldShowNextPrevWithToolbar{
+    objc_setAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFER, [NSNumber numberWithBool:shouldShowNextPrevWithToolbar], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+-(BOOL)shouldShowNextPrevWithToolbar{
+    return [objc_getAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFER) boolValue];
+}
+
+-(void)setClassObjects:(NSArray *)classObjects{
+    objc_setAssociatedObject(self, &CLASS_OBJECTS_IDENTIFER, classObjects, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+-(NSArray*)classObjects{
+    return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFER);
+}
 
 -(void)selectFieldWithSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock{
     
@@ -131,14 +149,9 @@ NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
 }
 
 
--(void)setClassObjects:(NSArray *)classObjects{
-    objc_setAssociatedObject(self, &CLASS_OBJECTS_IDENTIFER, classObjects, OBJC_ASSOCIATION_COPY_NONATOMIC);
-}
 
--(NSArray*)classObjects{
-    return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFER);
-}
 -(void)keyboardWillShow:(NSNotification*)not{
+    if (self.shouldShowNextPrevWithToolbar) {
     id firstResponder = [self findFirstResponderBeneathView:self];
     if (![firstResponder inputAccessoryView]) {
         UIToolbar *toolBar = [self toolbarInit];
@@ -156,7 +169,7 @@ NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
         
         [self adjustContentOffset];
     }
-    
+    }
     
 }
 
@@ -177,12 +190,15 @@ NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
 
 }
 
+
 -(void)keyboardWillHide:(id)sender{
-    if ([self isKindOfClass:[UIScrollView class]]) {
-        UIScrollView *scroll= (UIScrollView*)self;
-        [scroll setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
-        [scroll setContentInset:UIEdgeInsetsMake(0, 0, 0, 0)];
-        [scroll setContentOffset:CGPointMake(0, 0) animated:YES];
+    if (self.shouldShowNextPrevWithToolbar) {
+        if ([self isKindOfClass:[UIScrollView class]]) {
+            UIScrollView *scroll= (UIScrollView*)self;
+            [scroll setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
+            [scroll setContentInset:UIEdgeInsetsMake(0, 0, 0, 0)];
+            [scroll setContentOffset:CGPointMake(0, 0) animated:YES];
+        }
     }
 }
 
@@ -334,7 +350,9 @@ NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
                     }
                 }
                 if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
-                    [field setDelegate:self];
+                    if (self.shouldShowNextPrevWithToolbar) {
+                        [field setDelegate:self];
+                    }
                 }
             }
             if([field respondsToSelector:@selector(subviews)]){

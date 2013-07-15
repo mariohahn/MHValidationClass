@@ -34,6 +34,7 @@ typedef NS_ENUM(NSUInteger, MHSelectionType) {
 
 @interface UIView (MHValidation)<UITextFieldDelegate>
 @property (nonatomic, copy) NSArray *classObjects;
+@property (nonatomic) BOOL shouldShowNextPrevWithToolbar;
 
 -(void)selectFieldWithSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock;
 
