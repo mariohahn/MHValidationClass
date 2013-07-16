@@ -8,12 +8,155 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
-         timestampString = "395311622.625605"
+         timestampString = "395592214.155077"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "116"
-         endingLineNumber = "116"
-         landmarkName = "-validateObjectOfClass:withNonMandatoryField:andShouldValidateObjectsWithMHRegexObjects:andSwitchesWhichMustBeON:curruptObjectBlock:successBlock:"
+         startingLineNumber = "269"
+         endingLineNumber = "269"
+         landmarkName = "-validateWithNonMandatoryField:andShouldValidateObjectsWithMHRegexObjects:andSwitchesWhichMustBeON:curruptObjectBlock:successBlock:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592214.155077"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "292"
+         endingLineNumber = "292"
+         landmarkName = "-validateWithNonMandatoryField:andShouldValidateObjectsWithMHRegexObjects:andSwitchesWhichMustBeON:curruptObjectBlock:successBlock:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592214.155077"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "308"
+         endingLineNumber = "308"
+         landmarkName = "-validateWithNonMandatoryField:andShouldValidateObjectsWithMHRegexObjects:andSwitchesWhichMustBeON:curruptObjectBlock:successBlock:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592214.155077"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "342"
+         endingLineNumber = "342"
+         landmarkName = "-findObjectsofClass:onView:andShowOnlyNonHiddenObjects:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592214.155077"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "233"
+         endingLineNumber = "233"
+         landmarkName = "-prevOrNext:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592149.157789"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "40"
+         endingLineNumber = "40"
+         landmarkName = "-shouldShowNextPrevWithToolbar"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592214.155077"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "154"
+         endingLineNumber = "154"
+         landmarkName = "-keyboardWillShow:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592214.155077"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "177"
+         endingLineNumber = "177"
+         landmarkName = "-adjustContentOffset"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592214.155077"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "183"
+         endingLineNumber = "183"
+         landmarkName = "-adjustContentOffset"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592214.155077"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "195"
+         endingLineNumber = "195"
+         landmarkName = "-keyboardWillHide:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592289.429851"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "153"
+         endingLineNumber = "153"
+         landmarkName = "-keyboardWillShow:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "MHValidationViewController/UIVIiew+MHValidation.m"
+         timestampString = "395592309.463258"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "37"
+         endingLineNumber = "37"
+         landmarkName = "-setShouldShowNextPrevWithToolbar:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

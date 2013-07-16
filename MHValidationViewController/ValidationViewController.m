@@ -12,32 +12,42 @@
 
 @end
 
-@implementation ValidationViewController
 
+
+@implementation ValidationViewController
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    
     [self.validateButton addTarget:self action:@selector(validateButtonAction) forControlEvents:UIControlEventTouchUpInside];
     
     self.firstName.accessibilityIdentifier = @"Firstname";
     self.secondName.accessibilityIdentifier = @"Secondname";
     self.email.accessibilityIdentifier = @"E-Mail";
-           
+    self.PLZ.accessibilityIdentifier = @"Postleitzahl";
+    self.sex.accessibilityIdentifier = @"Geschlecht";
+    self.allow.accessibilityIdentifier = @"Erlauben";
+    
+    
+    [self.scrollView initMHValidationWithClassObjectsToValidate:@[[UITextField class],[UISwitch class],[UISegmentedControl class]]];
+    [self.scrollView setShouldShowNextPrevWithToolbar:NO];
+    
+    
 }
+
 -(void)validateButtonAction{
     
-    MHValidationItem *emailValidation = [[MHValidationItem alloc]initWithObject:self.email andRegexString:MHValidationRegexEmail];
+    MHValidationItem *emailValidation = [[MHValidationItem alloc]initWithObject:self.email regexString:MHValidationRegexEmail];
     
-    [self.scrollView validateObjectOfClass:@[[UITextField class]]
-                     withNonMandatoryField:nil
-andShouldValidateObjectsWithMHRegexObjects:@[emailValidation]
-                  andSwitchesWhichMustBeON:nil
-                        curruptObjectBlock:^(NSArray *curruptItem) {
+    [self.scrollView validateWithNonMandatoryField:@[self.secondName]
+        andShouldValidateObjectsWithMHRegexObjects:@[emailValidation]
+                          switchesWhichMustBeON:nil
+                                curruptObjectBlock:^(NSArray *curruptItem) {
+                                        [self.scrollView shakeObjects:curruptItem andChangeBorderColor:nil];
                             
-                                                [self.scrollView shakeObjects:curruptItem andChangeBorderColor:nil];
-                            
-                            } successBlock:^(NSString *emailString, NSDictionary *valueKeyEmail, NSArray *object, bool isFirstRegistration) {
+                                    } successBlock:^(NSString *emailString, NSDictionary *valueKeyEmail, NSArray *object, bool isFirstRegistration) {
                                 
                                 NSLog(@"%@",emailString);
                                 NSLog(@"%@",valueKeyEmail);

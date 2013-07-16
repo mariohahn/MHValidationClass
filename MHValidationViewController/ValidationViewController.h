@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "UIVIiew+MHValidation.h"
+#import "UIView+MHValidation.h"
 
 @interface ValidationViewController : UIViewController
 @property (nonatomic,strong) IBOutlet UIScrollView *scrollView;
@@ -15,4 +15,8 @@
 @property (nonatomic,strong) IBOutlet UITextField *firstName;
 @property (nonatomic,strong) IBOutlet UITextField *secondName;
 @property (nonatomic,strong) IBOutlet UITextField *email;
+@property (nonatomic,strong) IBOutlet UITextField *PLZ;
+@property (nonatomic,strong) IBOutlet UISegmentedControl *sex;
+@property (nonatomic,strong) IBOutlet UISwitch *allow;
+
 @end
