@@ -6,19 +6,20 @@
 //  Copyright (c) 2013 Mario Hahn. All rights reserved.
 //
 
-#import "UIVIiew+MHValidation.h"
+#import "UIView+MHValidation.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
 #define _UIKeyboardFrameEndUserInfoKey (&UIKeyboardFrameEndUserInfoKey != NULL ? UIKeyboardFrameEndUserInfoKey : @"UIKeyboardBoundsUserInfoKey")
 
-NSString * const CLASS_OBJECTS_IDENTIFER = @"CLASS_OBJECTS_IDENTIFER";
-NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
+NSString * const SHAKE_OBJECTS_IDENTIFIER = @"SHAKE_OBJECTS_IDENTIFIER";
+NSString * const CLASS_OBJECTS_IDENTIFIER = @"CLASS_OBJECTS_IDENTIFIER";
+NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
 
 
 @implementation MHValidationItem
 
--(id)initWithObject:(id)object andRegexString:(NSString *)regexString{
+-(id)initWithObject:(id)object regexString:(NSString *)regexString{
     self = [super init];
     if (!self)
         return nil;
@@ -31,22 +32,33 @@ NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
 @implementation UIView (MHValidation)
 @dynamic classObjects;
 @dynamic shouldShowNextPrevWithToolbar;
+@dynamic shouldShakeNonValidateObjects;
 
 
+//SHAKE OBEJCTS
+-(void)setShouldShakeNonValidateObjects:(BOOL)shouldShakeNonValidateObjects{
+    objc_setAssociatedObject(self, &SHAKE_OBJECTS_IDENTIFIER, [NSNumber numberWithBool:shouldShakeNonValidateObjects], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+-(BOOL)shouldShakeNonValidateObjects{
+    return [objc_getAssociatedObject(self, &SHAKE_OBJECTS_IDENTIFIER) boolValue];
+}
 
+
+//ENABLE NEXT PREV
 -(void)setShouldShowNextPrevWithToolbar:(BOOL)shouldShowNextPrevWithToolbar{
-    objc_setAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFER, [NSNumber numberWithBool:shouldShowNextPrevWithToolbar], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFIER, [NSNumber numberWithBool:shouldShowNextPrevWithToolbar], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 -(BOOL)shouldShowNextPrevWithToolbar{
-    return [objc_getAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFER) boolValue];
+    return [objc_getAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFIER) boolValue];
 }
 
+//CLASS OBEJCTS
 -(void)setClassObjects:(NSArray *)classObjects{
-    objc_setAssociatedObject(self, &CLASS_OBJECTS_IDENTIFER, classObjects, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &CLASS_OBJECTS_IDENTIFIER, classObjects, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 -(NSArray*)classObjects{
-    return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFER);
+    return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFIER);
 }
 
 -(void)selectFieldWithSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock{
@@ -253,7 +265,7 @@ NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
     return toolbar;
 }
 
--(void)validateWithNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithMHRegexObjects:(NSArray*)regexObject andSwitchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock{
+-(void)validateWithNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithMHRegexObjects:(NSArray*)regexObject switchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock{
 
     NSArray *fields = [self findObjectsofClass:self.classObjects onView:self andShowOnlyNonHiddenObjects:YES];
     NSMutableArray *curruptFields = [NSMutableArray new];
@@ -283,6 +295,9 @@ NSString * const ENABLE_NEXTPREV_IDENTIFER = @"ENABLE_NEXTPREV_IDENTIFER";
     if (curruptFields.count) {
         if (CurruptedObjectBlock) {
             CurruptedObjectBlock([NSArray arrayWithArray:curruptFields]);
+            if (self.shouldShakeNonValidateObjects) {
+                [self shakeObjects:[NSArray arrayWithArray:curruptFields] andChangeBorderColor:nil];
+            }
         }
     }else{
         if (SuccessBlock) {

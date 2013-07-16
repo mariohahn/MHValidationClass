@@ -28,17 +28,19 @@ typedef NS_ENUM(NSUInteger, MHSelectionType) {
 @property (nonatomic, strong) id object;
 @property (nonatomic,strong) NSString *regexString;
 
-- (id)initWithObject:(id)object andRegexString:(NSString*)regexString;
+- (id)initWithObject:(id)object regexString:(NSString*)regexString;
 @end
 
 
 @interface UIView (MHValidation)<UITextFieldDelegate>
 @property (nonatomic, copy) NSArray *classObjects;
 @property (nonatomic) BOOL shouldShowNextPrevWithToolbar;
+@property (nonatomic) BOOL shouldShakeNonValidateObjects;
+
 
 -(void)selectFieldWithSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock;
 
--(void)validateWithNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithMHRegexObjects:(NSArray*)regexObject andSwitchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock;
+-(void)validateWithNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithMHRegexObjects:(NSArray*)regexObject switchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock;
 - (void)shakeObjects:(id)objects andChangeBorderColor:(UIColor*)borderColor;
 
 -(NSArray*)findObjectsofClass:(NSArray*)classArray onView:(UIView*)view andShowOnlyNonHiddenObjects:(BOOL)nonHidden;

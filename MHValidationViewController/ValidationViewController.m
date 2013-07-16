@@ -19,17 +19,19 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    
     [self.validateButton addTarget:self action:@selector(validateButtonAction) forControlEvents:UIControlEventTouchUpInside];
     
     self.firstName.accessibilityIdentifier = @"Firstname";
     self.secondName.accessibilityIdentifier = @"Secondname";
     self.email.accessibilityIdentifier = @"E-Mail";
     self.PLZ.accessibilityIdentifier = @"Postleitzahl";
-    self.userName.accessibilityIdentifier = @"Username";
-    self.passwort.accessibilityIdentifier = @"Passwort";
+    self.sex.accessibilityIdentifier = @"Geschlecht";
+    self.allow.accessibilityIdentifier = @"Erlauben";
     
     
-    [self.scrollView initMHValidationWithClassObjectsToValidate:@[[UITextField class]]];
+    [self.scrollView initMHValidationWithClassObjectsToValidate:@[[UITextField class],[UISwitch class],[UISegmentedControl class]]];
     [self.scrollView setShouldShowNextPrevWithToolbar:NO];
     
     
@@ -37,11 +39,11 @@
 
 -(void)validateButtonAction{
     
-    MHValidationItem *emailValidation = [[MHValidationItem alloc]initWithObject:self.email andRegexString:MHValidationRegexEmail];
+    MHValidationItem *emailValidation = [[MHValidationItem alloc]initWithObject:self.email regexString:MHValidationRegexEmail];
     
-    [self.scrollView validateWithNonMandatoryField:nil
+    [self.scrollView validateWithNonMandatoryField:@[self.secondName]
         andShouldValidateObjectsWithMHRegexObjects:@[emailValidation]
-                          andSwitchesWhichMustBeON:nil
+                          switchesWhichMustBeON:nil
                                 curruptObjectBlock:^(NSArray *curruptItem) {
                                         [self.scrollView shakeObjects:curruptItem andChangeBorderColor:nil];
                             
