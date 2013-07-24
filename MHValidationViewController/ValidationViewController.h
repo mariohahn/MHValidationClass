@@ -16,7 +16,9 @@
 @property (nonatomic,strong) IBOutlet UITextField *secondName;
 @property (nonatomic,strong) IBOutlet UITextField *email;
 @property (nonatomic,strong) IBOutlet UITextField *PLZ;
+@property (nonatomic,strong) IBOutlet UITextField *phoneNumber;
 @property (nonatomic,strong) IBOutlet UISegmentedControl *sex;
 @property (nonatomic,strong) IBOutlet UISwitch *allow;
+@property (nonatomic,strong) IBOutlet UITextView *problems;
 
 @end

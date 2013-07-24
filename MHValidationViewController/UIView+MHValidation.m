@@ -12,9 +12,194 @@
 
 #define _UIKeyboardFrameEndUserInfoKey (&UIKeyboardFrameEndUserInfoKey != NULL ? UIKeyboardFrameEndUserInfoKey : @"UIKeyboardBoundsUserInfoKey")
 
+
+
 NSString * const SHAKE_OBJECTS_IDENTIFIER = @"SHAKE_OBJECTS_IDENTIFIER";
 NSString * const CLASS_OBJECTS_IDENTIFIER = @"CLASS_OBJECTS_IDENTIFIER";
 NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
+NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
+
+
+
+@implementation MHTextView
+
+-(id)initWithFrame:(CGRect)frame customization:(MHTextObjectsCustomization*)customization isSelected:(BOOL)isSelected{
+    self = [super initWithFrame:frame];
+    if (!self)
+        return nil;
+    self.isSelected = isSelected;
+    self.customization = customization;
+    self.backgroundColor = [UIColor clearColor];
+    return self;
+}
+
+
+-(void)drawRect:(CGRect)rect{
+    
+    
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = UIGraphicsGetCurrentContext();
+
+    UIColor* gradientColorUp = self.customization.borderGradientColorUp;
+    UIColor* gradientColorDown = self.customization.borderGradientColorDow;
+    UIColor* backgroundColor = self.customization.backgroundColor;
+    UIColor* shadow = self.customization.innerShadowColor;
+    if (self.isSelected) {
+        gradientColorUp = self.customization.selectionGradientBorderColorUp;
+        gradientColorDown = self.customization.selectionGradientBorderColorDown;
+        backgroundColor = self.customization.selectionBackgroundColor;
+        shadow = self.customization.selectionInnerShadowColor;
+    }
+
+    
+    NSArray* gradientColorsForBorder = [NSArray arrayWithObjects:
+                                (id)gradientColorUp.CGColor,
+                                (id)gradientColorDown.CGColor, nil];
+    CGFloat gradientColorsForBorderLocations[] = {0, 1};
+    CGGradientRef borderGradient = CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef)gradientColorsForBorder, gradientColorsForBorderLocations);
+
+    
+    CGSize shadowOffset = CGSizeMake(0.1, 1.1);
+    CGFloat shadowBlurRadius = 2.5;
+
+    
+    UIBezierPath* borderGradientPath = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1, 1, rect.size.width-2, rect.size.height-2) cornerRadius: self.customization.cornerRadius];
+    CGContextSaveGState(context);
+    [borderGradientPath addClip];
+    CGContextDrawLinearGradient(context, borderGradient, CGPointMake(((rect.size.width-2)/2)+1, 1), CGPointMake(((rect.size.width-2)/2)+1, 1+rect.size.height-2), 0);
+    CGContextRestoreGState(context);
+        
+    UIBezierPath* rectangle2Path = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1+self.customization.borderWidth, 1+self.customization.borderWidth, rect.size.width-((1+self.customization.borderWidth)*2), rect.size.height-((1+self.customization.borderWidth)*2)) cornerRadius: self.customization.cornerRadius];
+    [backgroundColor setFill];
+    [rectangle2Path fill];
+    
+    CGRect rectangle2BorderRect = CGRectInset([rectangle2Path bounds], -shadowBlurRadius, -shadowBlurRadius);
+    rectangle2BorderRect = CGRectOffset(rectangle2BorderRect, -shadowOffset.width, -shadowOffset.height);
+    rectangle2BorderRect = CGRectInset(CGRectUnion(rectangle2BorderRect, [rectangle2Path bounds]), -1, -1);
+    
+    UIBezierPath* rectangle2NegativePath = [UIBezierPath bezierPathWithRect: rectangle2BorderRect];
+    [rectangle2NegativePath appendPath: rectangle2Path];
+    rectangle2NegativePath.usesEvenOddFillRule = YES;
+    
+    CGContextSaveGState(context);
+    {
+        CGFloat xOffset = shadowOffset.width + round(rectangle2BorderRect.size.width);
+        CGFloat yOffset = shadowOffset.height;
+        CGContextSetShadowWithColor(context,
+                                    CGSizeMake(xOffset + copysign(0.1, xOffset), yOffset + copysign(0.1, yOffset)),
+                                    shadowBlurRadius,
+                                    shadow.CGColor);
+        
+        [rectangle2Path addClip];
+        CGAffineTransform transform = CGAffineTransformMakeTranslation(-round(rectangle2BorderRect.size.width), 0);
+        [rectangle2NegativePath applyTransform: transform];
+        [[UIColor grayColor] setFill];
+        [rectangle2NegativePath fill];
+    }
+    CGContextRestoreGState(context);
+
+    CGGradientRelease(borderGradient);
+    CGColorSpaceRelease(colorSpace);
+    
+}
+/*-(void)drawRect:(CGRect)rect{
+    
+    
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    UIColor* borderColor = self.customization.borderColor;
+    UIColor* fillColor = self.customization.backgroundColor;
+
+    if (self.isSelected) {
+        borderColor =  self.customization.selectionBorderColor;
+        fillColor = self.customization.selectionBackgroundColor;
+    }
+    
+    
+
+    
+    UIColor* innerShadowColor = self.customization.innerShadowColor;
+
+    UIColor* shadow = innerShadowColor;
+    CGSize shadowOffset = CGSizeMake(0.1, -0.1);
+    CGFloat shadowBlurRadius = 3.5;
+
+    
+    UIBezierPath* rectanglePath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(1, 1, rect.size.width-2, rect.size.height-2) cornerRadius: self.customization.cornerRadius];
+    [fillColor setFill];
+    [rectanglePath fill];
+    
+    CGRect rectangleBorderRect = CGRectInset([rectanglePath bounds], -shadowBlurRadius, -shadowBlurRadius);
+    rectangleBorderRect = CGRectOffset(rectangleBorderRect, -shadowOffset.width, -shadowOffset.height);
+    rectangleBorderRect = CGRectInset(CGRectUnion(rectangleBorderRect, [rectanglePath bounds]), -1, -1);
+    
+    UIBezierPath* rectangleNegativePath = [UIBezierPath bezierPathWithRect: rectangleBorderRect];
+    [rectangleNegativePath appendPath: rectanglePath];
+    rectangleNegativePath.usesEvenOddFillRule = YES;
+    
+    CGContextSaveGState(context);
+    {
+        CGFloat xOffset = shadowOffset.width + round(rectangleBorderRect.size.width);
+        CGFloat yOffset = shadowOffset.height;
+        CGContextSetShadowWithColor(context,
+                                    CGSizeMake(xOffset + copysign(0.1, xOffset), yOffset + copysign(0.1, yOffset)),
+                                    shadowBlurRadius,
+                                    shadow.CGColor);
+        
+        [rectanglePath addClip];
+        CGAffineTransform transform = CGAffineTransformMakeTranslation(-round(rectangleBorderRect.size.width), 0);
+        [rectangleNegativePath applyTransform: transform];
+        [[UIColor grayColor] setFill];
+        [rectangleNegativePath fill];
+    }
+    CGContextRestoreGState(context);
+    
+    [borderColor setStroke];
+    rectanglePath.lineWidth = self.customization.borderWidth;
+    [rectanglePath stroke];
+}*/
+
+@end
+
+
+@implementation MHTextObjectsCustomization
+
+- (id)initWithClassesForCustomization:(NSArray*)classes
+                      backgroundColor:(UIColor*)backgroundColor
+             selectionBackgroundColor:(UIColor*)selectionBackgroundColor
+                borderGradientColorUp:(UIColor*)borderGradientColorUp
+               borderGradientColorDow:(UIColor*)borderGradientColorDow
+       selectionGradientBorderColorUp:(UIColor*)selectionGradientBorderColorUp
+     selectionGradientBorderColorDown:(UIColor*)selectionGradientBorderColorDown
+                          borderWidth:(float)borderWidth
+                         cornerRadius:(float)cornerRadius
+                     innerShadowColor:(UIColor*)innerShadowColor
+            selectionInnerShadowColor:(UIColor*)selectionInnerShadowColor
+                           labelColor:(UIColor*)labelColor
+                            labelFont:(UIFont*)labelFont
+                  selectionLabelColor:(UIColor*)selectionLabelColor
+{
+    self = [super init];
+    if (!self)
+        return nil;
+    self.classes = classes;
+    self.backgroundColor = backgroundColor;
+    self.selectionBackgroundColor = selectionBackgroundColor;
+    self.borderGradientColorDow = borderGradientColorDow;
+    self.borderGradientColorUp = borderGradientColorUp;
+    self.selectionGradientBorderColorDown = selectionGradientBorderColorDown;
+    self.selectionGradientBorderColorUp = selectionGradientBorderColorUp;
+    self.borderWidth = borderWidth;
+    self.cornerRadius = cornerRadius;
+    self.innerShadowColor = innerShadowColor;
+    self.labelColor = labelColor;
+    self.labelFont = labelFont;
+    self.selectionLabelColor = selectionLabelColor;
+    self.selectionInnerShadowColor = selectionInnerShadowColor;
+    return self;
+}
+
+
+@end
 
 
 @implementation MHValidationItem
@@ -29,10 +214,14 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
 }
 @end
 
+
+
 @implementation UIView (MHValidation)
 @dynamic classObjects;
-@dynamic shouldShowNextPrevWithToolbar;
+@dynamic showNextAndPrevSegmentedControl;
 @dynamic shouldShakeNonValidateObjects;
+@dynamic textObjectsCustomization;
+
 
 
 //SHAKE OBEJCTS
@@ -43,12 +232,21 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
     return [objc_getAssociatedObject(self, &SHAKE_OBJECTS_IDENTIFIER) boolValue];
 }
 
+//CUSTOMIZATION
+-(void)setTextObjectsCustomization:(MHTextObjectsCustomization *)textObjectsCustomization{
+    objc_setAssociatedObject(self, &CUSTOMIZATION_IDENTIFIER, textObjectsCustomization, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+-(MHTextObjectsCustomization*)textObjectsCustomization{
+    return objc_getAssociatedObject(self, &CUSTOMIZATION_IDENTIFIER);
+}
+
 
 //ENABLE NEXT PREV
--(void)setShouldShowNextPrevWithToolbar:(BOOL)shouldShowNextPrevWithToolbar{
-    objc_setAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFIER, [NSNumber numberWithBool:shouldShowNextPrevWithToolbar], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+-(void)setShowNextAndPrevSegmentedControl:(BOOL)showNextAndPrevSegmentedControl{
+    objc_setAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFIER, [NSNumber numberWithBool:showNextAndPrevSegmentedControl], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
--(BOOL)shouldShowNextPrevWithToolbar{
+-(BOOL)showNextAndPrevSegmentedControl{
     return [objc_getAssociatedObject(self, &ENABLE_NEXTPREV_IDENTIFIER) boolValue];
 }
 
@@ -61,9 +259,27 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
     return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFIER);
 }
 
--(void)selectFieldWithSelectedObject:(id)selectedObject searchForObjectsOfClass:(NSArray*)classes selectNextOrPrevObject:(MHSelectionType)selectionType foundObjectBlock:(void(^)(id object, MHSelectedObjectType objectType ))FoundObjectBlock{
+-(void)searchForObjectsOfClass:(NSArray*)classes
+        selectNextOrPrevObject:(MHSelectionType)selectionType
+              foundObjectBlock:(void(^)(id object,
+                                        MHSelectedObjectType objectType )
+                                )FoundObjectBlock{
     
-    NSArray *textFields = [self findObjectsofClass:classes onView:self andShowOnlyNonHiddenObjects:YES];
+    
+    id selectedObject = [self findFirstResponderOnView:self];
+    NSMutableArray *classesOnlyText = [NSMutableArray new];
+    for (id classFromClasses in classes) {
+        if ([[classFromClasses class] isEqual:[UITextView class]]||[[classFromClasses class] isEqual:[UITextField class]]) {
+            [classesOnlyText addObject:classFromClasses];
+        }
+    }
+    NSArray *allObjectsWhichAreKindOfClasses = [self findObjectsofClass:classesOnlyText onView:self showOnlyNonHiddenObjects:YES];
+    if (allObjectsWhichAreKindOfClasses.count<=1) {
+        [self hideSegment:YES];
+    }else{
+        [self hideSegment:NO];
+    }
+    
     NSComparator comparatorBlock = ^(id obj1, id obj2) {
         if ([obj1 frame].origin.y > [obj2 frame].origin.y) {
             return (NSComparisonResult)NSOrderedDescending;
@@ -74,7 +290,7 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
         return (NSComparisonResult)NSOrderedSame;
     };
     id objectWhichShouldBecomeFirstResponder= nil;
-    NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:textFields];
+    NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:allObjectsWhichAreKindOfClasses];
     [fieldsSort sortUsingComparator:comparatorBlock];
     for (id viewsAndFields in fieldsSort) {
         if (([viewsAndFields frame].origin.y == [selectedObject frame].origin.y)&&([viewsAndFields frame].origin.x > [selectedObject frame].origin.x) ) {
@@ -105,10 +321,10 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
         }
         
         if (!objectWhichShouldBecomeFirstResponder) {
-            int index = [fieldsSort indexOfObject:[self findFirstResponderBeneathView:self]];
+            int index = [fieldsSort indexOfObject:[self findFirstResponderOnView:self]];
             objectWhichShouldBecomeFirstResponder = [fieldsSort objectAtIndex:index-1];
             FoundObjectBlock(objectWhichShouldBecomeFirstResponder,MHSelectedObjectTypeMiddle);
-
+            
             return;
         }
         
@@ -130,21 +346,30 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
             
         }
     }else{
-        if ([fieldsSort indexOfObject:[self findFirstResponderBeneathView:self]]==0) {
-            FoundObjectBlock([self findFirstResponderBeneathView:self],MHSelectedObjectTypeFirst);
-        }else if ([fieldsSort indexOfObject:[self findFirstResponderBeneathView:self]]==fieldsSort.count-1) {
-            FoundObjectBlock([self findFirstResponderBeneathView:self],MHSelectedObjectTypeLast);
+        if ([fieldsSort indexOfObject:[self findFirstResponderOnView:self]]==0) {
+            FoundObjectBlock([self findFirstResponderOnView:self],MHSelectedObjectTypeFirst);
+        }else if ([fieldsSort indexOfObject:[self findFirstResponderOnView:self]]==fieldsSort.count-1) {
+            FoundObjectBlock([self findFirstResponderOnView:self],MHSelectedObjectTypeLast);
         }else{
-            FoundObjectBlock([self findFirstResponderBeneathView:self],MHSelectedObjectTypeMiddle);
+            FoundObjectBlock([self findFirstResponderOnView:self],MHSelectedObjectTypeMiddle);
         }
     }
     if ([selectedObject isFirstResponder] && selectionType == MHSelectionTypeNext) {
         FoundObjectBlock(nil,MHSelectedObjectTypeLast);
     }
 }
-
+-(void)hideSegment:(BOOL)hide{
+    id firstresponder = [self findFirstResponderOnView:self];
+    for (id object in [[firstresponder inputAccessoryView] subviews]) {
+        if ([object isKindOfClass:[UISegmentedControl class]]) {
+            UISegmentedControl *segm = object;
+            [segm setHidden:hide];
+        }
+    }
+    
+}
 -(void)disableSegment:(MHSelectionType)mhselectionType{
-    id firstresponder = [self findFirstResponderBeneathView:self];
+    id firstresponder = [self findFirstResponderOnView:self];
     for (id object in [[firstresponder inputAccessoryView] subviews]) {
         if ([object isKindOfClass:[UISegmentedControl class]]) {
             UISegmentedControl *segm = object;
@@ -163,48 +388,143 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
 
 
 -(void)keyboardWillShow:(NSNotification*)not{
-    if (self.shouldShowNextPrevWithToolbar) {
-    id firstResponder = [self findFirstResponderBeneathView:self];
-    if (![firstResponder inputAccessoryView]) {
-        UIToolbar *toolBar = [self toolbarInit];
-        [toolBar sizeToFit];
-        [firstResponder setInputAccessoryView:toolBar];
-    }
-    [self selectFieldWithSelectedObject:[self findFirstResponderBeneathView:self] searchForObjectsOfClass:self.classObjects selectNextOrPrevObject:MHSelectionTypeCurrent foundObjectBlock:^(id object, MHSelectedObjectType objectType) {
-        if (objectType == MHSelectedObjectTypeFirst) {
-            [self disableSegment:MHSelectionTypePrev];
-        }else if(objectType == MHSelectedObjectTypeLast){
-            [self disableSegment:MHSelectionTypeNext];
-        }
-    }];
-    if ([self isKindOfClass:[UIScrollView class]]) {
-        
-        [self adjustContentOffset];
-    }
-    }
+
     
+    if (![not userInfo]) {
+        
+        if (self.showNextAndPrevSegmentedControl) {
+            [self setCustomization:self.textObjectsCustomization
+                        forObjects:[self findObjectsofClass:self.textObjectsCustomization.classes
+                                                     onView:self
+                                   showOnlyNonHiddenObjects:NO]];
+            id firstResponder = [self findFirstResponderOnView:self];
+            if (![firstResponder inputAccessoryView]) {
+                [firstResponder becomeFirstResponder];
+
+                UIToolbar *toolBar = [self toolbarInit];
+                [toolBar sizeToFit];
+                [firstResponder setInputAccessoryView:toolBar];
+                if ([firstResponder isKindOfClass:[UITextView class]]) {
+                    [self endEditing:YES];
+                }
+            }
+            [self searchForObjectsOfClass:self.classObjects
+                   selectNextOrPrevObject:MHSelectionTypeCurrent
+                         foundObjectBlock:^(id object,
+                                            MHSelectedObjectType objectType
+                                            ) {
+                             
+                             if (objectType == MHSelectedObjectTypeFirst) {
+                                 [self disableSegment:MHSelectionTypePrev];
+                             }else if(objectType == MHSelectedObjectTypeLast){
+                                 [self disableSegment:MHSelectionTypeNext];
+                             }
+                         }];
+            
+        }
+    }else{
+        id firstResponder = [self findFirstResponderOnView:self];
+
+        if ([self isKindOfClass:[UIScrollView class]]) {
+            
+            [self adjustContentOffset];
+            
+            if (![firstResponder isKindOfClass:[UITextField class]]|| ![firstResponder isKindOfClass:[UITextView class]] || !firstResponder) {
+                UIScrollView *scroll = (UIScrollView*)self;
+                [scroll setContentInset:UIEdgeInsetsMake(scroll.contentInset.top, scroll.contentInset.left, scroll.contentInset.bottom+280, scroll.contentInset.right)];
+            }
+        }
+    }
 }
+
+
 
 
 -(void)adjustContentOffset{
     UIScrollView *scroll = (UIScrollView*)self;
     
-    id firstResponder = [self findFirstResponderBeneathView:self];
-   
+    id firstResponder = [self findFirstResponderOnView:self];
+    
     if([firstResponder frame].origin.y+[firstResponder frame].size.height<(self.bounds.size.height-[firstResponder inputAccessoryView].frame.size.height-250)){
         [scroll setContentOffset:CGPointMake(0,0) animated:YES];
     }else{
         [scroll setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+265, 0)];
-        [scroll setContentInset:UIEdgeInsetsMake(0, 0, ([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+265, 0)];
         [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+265) animated:YES];
-
     }
+    
+}
 
+- (UIImage *)imageByRenderingView:(id)view{
+    CGFloat scale = 1.0;
+    if([[UIScreen mainScreen]respondsToSelector:@selector(scale)]) {
+        CGFloat tmp = [[UIScreen mainScreen]scale];
+        if (tmp > 1.5) {
+            scale = 2.0;
+        }
+    }
+    if(scale > 1.5) {
+        UIGraphicsBeginImageContextWithOptions([view bounds].size, NO, scale);
+    } else {
+        UIGraphicsBeginImageContext([view bounds].size);
+    }
+    
+    
+    [[view layer] renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return resultingImage;
+}
+
+
+
+-(void)setCustomization:(MHTextObjectsCustomization*)customization
+             forObjects:(NSArray*)customizationObjects{
+    
+    for (id object in customizationObjects) {
+        BOOL isSelected =NO;
+        if (object == [self findFirstResponderOnView:self]) {
+            isSelected =YES;
+        }
+        
+        MHTextView *txtView = [[MHTextView alloc]initWithFrame:[object frame]
+                                                 customization:customization
+                                                    isSelected:isSelected];
+            if ([object isKindOfClass:[UITextField class]]) {
+                [object setBorderStyle:UITextBorderStyleNone];
+                [object setBackground:[self imageByRenderingView:txtView]];
+                UIView *paddingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 20)];
+                [object setLeftView:paddingView];
+                [object setLeftViewMode:UITextFieldViewModeAlways];
+                [object setRightView:paddingView];
+                [object setRightViewMode:UITextFieldViewModeAlways];
+                [object setBorderStyle:UITextBorderStyleNone];
+            }else{
+                [object setBackgroundColor:[UIColor colorWithPatternImage:[self imageByRenderingView:txtView] ]];
+            }
+        
+            [object setFont:customization.labelFont];
+            [object setTextColor:customization.labelColor];
+
+            if (isSelected) {
+                [object setTextColor:customization.selectionLabelColor];
+            }
+    }
+}
+
+
+
+-(void)doTextFieldShadowForObject:(id)object{
+    
 }
 
 
 -(void)keyboardWillHide:(id)sender{
-    if (self.shouldShowNextPrevWithToolbar) {
+    [self setCustomization:self.textObjectsCustomization
+                forObjects:[self findObjectsofClass:self.textObjectsCustomization.classes
+                                             onView:self
+                           showOnlyNonHiddenObjects:NO]];
+    
+    if (self.showNextAndPrevSegmentedControl) {
         if ([self isKindOfClass:[UIScrollView class]]) {
             UIScrollView *scroll= (UIScrollView*)self;
             [scroll setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
@@ -214,41 +534,107 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
     }
 }
 
--(void)initMHValidationWithClassObjectsToValidate:(NSArray*)classObjects{
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UITextFieldTextDidBeginEditingNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+-(void)installMHValidationWithClasses:(NSArray*)typeOfClasses
+                setCustomizationBlock:(void(^)(MHTextObjectsCustomization *customization))CustomizationBlock{
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UITextFieldTextDidBeginEditingNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UITextViewTextDidBeginEditingNotification object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardDidShowNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UITextFieldTextDidEndEditingNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UITextViewTextDidEndEditingNotification
+                                               object:nil];
+    if (CustomizationBlock) {
+        self.textObjectsCustomization = [self setDefaultCustomization];
+        CustomizationBlock(self.textObjectsCustomization);
+        [self setCustomization:self.textObjectsCustomization
+                    forObjects:[self findObjectsofClass:self.textObjectsCustomization.classes
+                                                 onView:self
+                               showOnlyNonHiddenObjects:NO]];
+        
 
-    self.classObjects = classObjects;
-    [self findObjectsofClass:classObjects onView:self andShowOnlyNonHiddenObjects:NO];
+    }
+    
+    self.classObjects = typeOfClasses;
+    [self findObjectsofClass:typeOfClasses
+                      onView:self
+    showOnlyNonHiddenObjects:NO];
+}
+-(MHTextObjectsCustomization*)setDefaultCustomization{
+    return [[MHTextObjectsCustomization alloc]initWithClassesForCustomization:@[[UITextField class],[UITextView class]]
+                                                              backgroundColor:[UIColor whiteColor]
+                                                     selectionBackgroundColor:[UIColor whiteColor]
+                                                        borderGradientColorUp:[UIColor colorWithRed:0.65f green:0.64f blue:0.63f alpha:1.00f]
+                                                       borderGradientColorDow:[UIColor colorWithRed:0.91f green:0.89f blue:0.88f alpha:1.00f]
+                                               selectionGradientBorderColorUp:[UIColor colorWithRed:0.64f green:0.00f blue:0.00f alpha:1.00f]
+                                             selectionGradientBorderColorDown:[UIColor colorWithRed:0.94f green:0.30f blue:0.36f alpha:1.00f]
+                                                                  borderWidth:1
+                                                                 cornerRadius:8
+                                                             innerShadowColor:[UIColor grayColor]
+                                                    selectionInnerShadowColor:[UIColor redColor]
+                                                                   labelColor:[UIColor blackColor]
+                                                                    labelFont:[UIFont systemFontOfSize:12]
+                                                          selectionLabelColor:[UIColor blackColor]];
 }
 
-- (UIView*)findFirstResponderBeneathView:(UIView*)view {
+- (UIView*)findFirstResponderOnView:(UIView*)view {
     for ( UIView *childView in view.subviews ) {
         if ( [childView respondsToSelector:@selector(isFirstResponder)] && [childView isFirstResponder] ) return childView;
-        UIView *result = [self findFirstResponderBeneathView:childView];
+        UIView *result = [self findFirstResponderOnView:childView];
         if ( result ) return result;
     }
     return nil;
 }
 
 -(void)prevOrNext:(UISegmentedControl*)segm{
+    
+    MHSelectionType type = MHSelectionTypePrev;
+    
     if (segm.selectedSegmentIndex ==1) {
-        [self selectFieldWithSelectedObject:[self findFirstResponderBeneathView:self] searchForObjectsOfClass:self.classObjects selectNextOrPrevObject:MHSelectionTypeNext foundObjectBlock:^(id object, MHSelectedObjectType objectType) {
-            [object becomeFirstResponder];
-        }];
-    }else{
-        [self selectFieldWithSelectedObject:[self findFirstResponderBeneathView:self] searchForObjectsOfClass:self.classObjects selectNextOrPrevObject:MHSelectionTypePrev foundObjectBlock:^(id object, MHSelectedObjectType objectType) {
-            [object becomeFirstResponder];
-        }];
-
+        type = MHSelectionTypeNext;
     }
+    
+    
+    [self searchForObjectsOfClass:self.classObjects
+           selectNextOrPrevObject:type
+                 foundObjectBlock:^(id object,
+                                    MHSelectedObjectType objectType
+                                    ) {
+                     [object becomeFirstResponder];
+                 }];
 }
 
 -(UISegmentedControl *)prevNextSegment {
     UISegmentedControl*  prevNextSegment = [[UISegmentedControl alloc] initWithItems:@[ NSLocalizedString(@"Zurück", nil), NSLocalizedString(@"Weiter", nil) ]];
     prevNextSegment.momentary = YES;
     prevNextSegment.segmentedControlStyle = UISegmentedControlStyleBar;
-    [prevNextSegment addTarget:self action:@selector(prevOrNext:) forControlEvents:UIControlEventValueChanged];
+    
+    [prevNextSegment addTarget:self
+                        action:@selector(prevOrNext:)
+              forControlEvents:UIControlEventValueChanged];
+    
     return prevNextSegment;
 }
 
@@ -256,18 +642,39 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
     UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectZero];
     toolbar.barStyle = UIBarStyleBlackTranslucent;
     NSMutableArray *barItems = [[NSMutableArray alloc] init];
-    [barItems addObject:[[UIBarButtonItem alloc] initWithCustomView:[self prevNextSegment]]];
-    [barItems addObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]];
     
-    UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissInputView)];
+    [barItems addObject:[[UIBarButtonItem alloc] initWithCustomView:[self prevNextSegment]]];
+    
+    [barItems addObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                                                      target:nil
+                                                                      action:nil]];
+    
+    UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                              target:self
+                                                                              action:@selector(dismissInputView)];
+    
     [barItems addObject:doneItem];
     [toolbar setItems:barItems animated:NO];
     return toolbar;
 }
 
--(void)validateWithNonMandatoryField:(NSArray*)nonMandatoryFields andShouldValidateObjectsWithMHRegexObjects:(NSArray*)regexObject switchesWhichMustBeON:(NSArray*)onSwitches curruptObjectBlock:(void(^)(NSArray *curruptItem))CurruptedObjectBlock successBlock:(void(^)(NSString *emailString,NSDictionary *valueKeyEmail,NSArray *object,bool isFirstRegistration))SuccessBlock{
-
-    NSArray *fields = [self findObjectsofClass:self.classObjects onView:self andShowOnlyNonHiddenObjects:YES];
+-(void)validateWithNONMandatoryTextObjects:(NSArray*)nonMandatoryFields
+         validateObjectsWithMHRegexObjects:(NSArray*)regexObject
+                     switchesWhichMustBeON:(NSArray*)onSwitches
+                        curruptObjectBlock:(void(^)(NSArray *curruptItem)
+                                            )CurruptedObjectBlock
+                              successBlock:(void(^)(NSString *emailString,
+                                                    NSDictionary *valueKeyDict,
+                                                    NSArray *object,
+                                                    bool isFirstRegistration)
+                                            )SuccessBlock{
+    
+    
+    NSArray *fields = [self findObjectsofClass:self.classObjects
+                                        onView:self
+                      showOnlyNonHiddenObjects:YES];
+    
+    
     NSMutableArray *curruptFields = [NSMutableArray new];
     [fields enumerateObjectsUsingBlock:^(id field, NSUInteger idx, BOOL *stop) {
         if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
@@ -296,7 +703,7 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
         if (CurruptedObjectBlock) {
             CurruptedObjectBlock([NSArray arrayWithArray:curruptFields]);
             if (self.shouldShakeNonValidateObjects) {
-                [self shakeObjects:[NSArray arrayWithArray:curruptFields] andChangeBorderColor:nil];
+                [self shakeObjects:[NSArray arrayWithArray:curruptFields] shakeBorderColor:nil];
             }
         }
     }else{
@@ -351,34 +758,51 @@ NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
     return fields;
 }
 
--(NSArray*)findObjectsofClass:(NSArray*)classArray onView:(UIView*)view andShowOnlyNonHiddenObjects:(BOOL)nonHidden{
+-(NSArray*)findObjectsofClass:(NSArray*)classArray
+                       onView:(UIView*)view
+     showOnlyNonHiddenObjects:(BOOL)nonHidden{
+    
+    
     NSMutableArray *fields= [NSMutableArray new];
     for(id field in [view subviews]){
         for (id class in classArray) {
             if([field isKindOfClass:class]){
                 if (![fields containsObject:field]) {
-                    if ([field alpha]==1 && nonHidden) {
-                        [fields addObject:field];
-                    }
-                    if (!nonHidden) {
+                    if (nonHidden) {
+                        BOOL isHidden = NO;
+                        if ([field alpha]==0) {
+                            isHidden =YES;
+                        }
+                        if ([field isHidden]) {
+                            isHidden =YES;
+                        }
+                        if (!isHidden) {
+                            [fields addObject:field];
+                        }
+                    }else{
                         [fields addObject:field];
                     }
                 }
                 if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
-                    if (self.shouldShowNextPrevWithToolbar) {
+                    if (self.showNextAndPrevSegmentedControl) {
                         [field setDelegate:self];
                     }
                 }
             }
             if([field respondsToSelector:@selector(subviews)]){
-                [self findObjectsofClass:classArray onView:field andShowOnlyNonHiddenObjects:nonHidden];
+                [self findObjectsofClass:classArray
+                                  onView:field
+                showOnlyNonHiddenObjects:nonHidden];
+                
             }
         }
     }
     return fields;
 }
 
-- (void)shakeObjects:(id)objects andChangeBorderColor:(UIColor*)borderColor{
+- (void)shakeObjects:(id)objects
+    shakeBorderColor:(UIColor*)borderColor{
+    
     for (id object in objects){
         CALayer *layer = [object layer];
         if (borderColor) {
