@@ -79,6 +79,17 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" keyboardAppearance="alert"/>
                                     </textField>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Phone" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="aDG-03-E3D">
+                                        <rect key="frame" x="16" y="328" width="67" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="eJI-Lg-BYh">
+                                        <rect key="frame" x="124" y="324" width="176" height="30"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" keyboardAppearance="alert"/>
+                                    </textField>
                                     <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" id="eGY-U5-kW6">
                                         <rect key="frame" x="223" y="77" width="79" height="27"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -91,13 +102,20 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" id="UQh-MM-KHT">
-                                        <rect key="frame" x="20" y="287" width="280" height="30"/>
+                                        <rect key="frame" x="20" y="281" width="280" height="30"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <segments>
                                             <segment title="Men"/>
                                             <segment title="Women"/>
                                         </segments>
                                     </segmentedControl>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Problems?" id="bU5-ic-EMn">
+                                        <rect key="frame" x="16" y="362" width="284" height="159"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences" keyboardAppearance="alert"/>
+                                    </textView>
                                 </subviews>
                             </scrollView>
                         </subviews>
@@ -108,6 +126,8 @@
                         <outlet property="allow" destination="eGY-U5-kW6" id="7q1-09-AKy"/>
                         <outlet property="email" destination="2a0-RV-uqK" id="L4R-QT-gjN"/>
                         <outlet property="firstName" destination="R7X-KU-5Qn" id="EAy-Xt-wsN"/>
+                        <outlet property="phoneNumber" destination="eJI-Lg-BYh" id="j2i-qA-QxA"/>
+                        <outlet property="problems" destination="bU5-ic-EMn" id="KcK-wZ-D18"/>
                         <outlet property="scrollView" destination="jj9-vF-FTD" id="esB-6e-xVH"/>
                         <outlet property="secondName" destination="BWl-pE-zTw" id="LDM-bk-8by"/>
                         <outlet property="sex" destination="UQh-MM-KHT" id="82L-D0-Ru5"/>
@@ -116,6 +136,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="-211" y="-54"/>
         </scene>
     </scenes>
     <classes>
@@ -126,6 +147,8 @@
                 <relationship kind="outlet" name="allow" candidateClass="UISwitch"/>
                 <relationship kind="outlet" name="email" candidateClass="UITextField"/>
                 <relationship kind="outlet" name="firstName" candidateClass="UITextField"/>
+                <relationship kind="outlet" name="phoneNumber" candidateClass="UITextField"/>
+                <relationship kind="outlet" name="problems" candidateClass="UITextView"/>
                 <relationship kind="outlet" name="scrollView" candidateClass="UIScrollView"/>
                 <relationship kind="outlet" name="secondName" candidateClass="UITextField"/>
                 <relationship kind="outlet" name="sex" candidateClass="UISegmentedControl"/>
