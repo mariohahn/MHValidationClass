@@ -36,7 +36,11 @@
     self.problems.accessibilityIdentifier = @"Probleme";
     self.phoneNumber.accessibilityIdentifier = @"Telefonnummer";
 
-    [self.scrollView setMHContentSizeOfScrollView];
+    
+    /****************************************************************************************************************************
+     Sets the ContentSize. You dont have to think about differnt Screen sizes 
+     ****************************************************************************************************************************/
+    [self.scrollView MHAutoContentSizeForScrollView];
     
     [self.scrollView installMHValidationWithClasses:@[[UITextField class],
                                                       [UISwitch class],
@@ -92,6 +96,7 @@
     
     MHValidationItem *emailValidation = [[MHValidationItem alloc]initWithObject:self.email
                                                                     regexString:MHValidationRegexEmail];
+    
     
     
     

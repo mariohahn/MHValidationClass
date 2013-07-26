@@ -87,7 +87,9 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 @end
 
 
-
+/****************************************************************************************************************************
+ MHValidation controls all text fields and text views if the text is longer than 0. If you want to check if the text is a valid email or consists only of numbers you can use a MHValidationItem
+ ****************************************************************************************************************************/
 
 @interface MHValidationItem : NSObject
 @property (nonatomic, strong) id object;
@@ -102,9 +104,39 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 
 
 @interface UIView (MHValidation)<UITextFieldDelegate,UITextViewDelegate>
+
+/**************************************************************************************************************************** 
+ List of available Classes + description:
+ 
+    Standard:
+            
+        UITextView:         checks if the textlenght is > 0
+        UITextField:        checks if the textlenght is > 0
+        UISegmentedControl: returns the name of the selected index
+        UISwicth:           returns ON or OFF
+ 
+    MHValidationItem:
+        
+        UITextView:         checks if the textlenght is > 0 and REGEX
+        UITextField:        checks if the textlenght is > 0 and REGEX
+        UISegmentedControl: Standard 
+        UISwicth:           Standard
+ ****************************************************************************************************************************/
 @property (nonatomic, copy) NSArray *classObjects;
+/****************************************************************************************************************************
+ Adds a ToolBar to UITextField and UITextView
+ 
+ ToolBar contains a doneButton and a SegmentedControl with a Next and Prev Button
+ if you use a ScrollView MHValidation sets the ContentOffset for you.
+ ****************************************************************************************************************************/
 @property (nonatomic) BOOL showNextAndPrevSegmentedControl;
+/****************************************************************************************************************************
+ AutoShake animation for NonValidateObjects
+ ****************************************************************************************************************************/
 @property (nonatomic) BOOL shouldShakeNonValidateObjects;
+
+
+
 @property (nonatomic,copy) MHTextObjectsCustomization *textObjectsCustomization;
 
 
@@ -113,6 +145,26 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
               foundObjectBlock:(void(^)(id object,
                                         MHSelectedObjectType objectType )
                                 )FoundObjectBlock;
+
+
+
+/****************************************************************************************************************************
+ Start Validation
+ nonMandatoryFields- Can only be TextViews and TextField
+ regexObject - Objects with special validation can only be TextViews and Textfields
+ onSwitches - Switches which must be on 
+ curruptObjectBlock - return all curruptItems
+ successBlock- can't find curruptItems
+ 
+                emailString structure:      <br /><br />accessibilityIdentifier:         outcome
+                valueKeyDict structure:     "accessibilityIdentifier" = outcome;
+                object structure:           @[object,object,object]
+
+ outcome:
+    UITextField & UITextView :          text
+    UISegmentedControl :                title of selected Objects
+    UISwitch :                          ON / OFF
+ ****************************************************************************************************************************/
 
 -(void)validateWithNONMandatoryTextObjects:(NSArray*)nonMandatoryFields
          validateObjectsWithMHRegexObjects:(NSArray*)regexObject
@@ -125,15 +177,25 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
                                                     bool isFirstRegistration)
                                             )SuccessBlock;
 
+/****************************************************************************************************************************
+ Sets the ContentSize. You dont have to think about differnt Screen sizes
+ ****************************************************************************************************************************/
+-(void)MHAutoContentSizeForScrollView;
 
--(void)setMHContentSizeOfScrollView;
-
-- (void)shakeObjects:(id)objects;
+/****************************************************************************************************************************
+Shake all objects from the objects Array
+ ****************************************************************************************************************************/
+- (void)shakeObjects:(NSArray*)objects;
 
 -(NSArray*)findObjectsofClass:(NSArray*)classArray
                        onView:(UIView*)view
      showOnlyNonHiddenObjects:(BOOL)nonHidden;
 
+/****************************************************************************************************************************
+**************************************************    REQUIRED Methode     ************************************************** 
+ Install MHValidation
+ typeOfClasses look at classObjects
+ ****************************************************************************************************************************/
 -(void)installMHValidationWithClasses:(NSArray*)typeOfClasses
                 setCustomizationBlock:(void(^)(MHTextObjectsCustomization *customization))CustomizationBlock;
 

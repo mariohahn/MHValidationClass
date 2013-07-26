@@ -406,7 +406,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [self adjustContentOffsetWithKeyBoardHeight:keyborad.size.height];
             
             UIScrollView *sv = (UIScrollView*)self;
-            [self setMHContentSizeOfScrollView];
+            [self MHAutoContentSizeForScrollView];
             [sv setContentInset:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
             [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
         }
@@ -475,8 +475,17 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                 [object setRightViewMode:UITextFieldViewModeAlways];
                 [object setBorderStyle:UITextBorderStyleNone];
             }else{
-
-                [object setBackgroundColor:[UIColor colorWithPatternImage:[self imageByRenderingView:txtView] ]];
+                for (id view in  [(UIScrollView*)self subviews]) {
+                    if ([view isKindOfClass:[MHTextView class]]) {
+                        if ([[view accessibilityIdentifier]isEqualToString:[object accessibilityIdentifier]]) {
+                            [view removeFromSuperview];
+                        }
+                    }
+                }
+                [txtView setAccessibilityIdentifier:[object accessibilityIdentifier]];
+                [self addSubview:txtView];
+                [self bringSubviewToFront:object];
+                [object setBackgroundColor:[UIColor clearColor]];
             }
             
             MHCustomizationDetail *detail = [MHCustomizationDetail new];
@@ -710,7 +719,21 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                             forObjects:curruptFields
                              withStyle:MHTextObjectsCustomizationStyleNonValidate];
                 
-                [self shakeObjects:[NSArray arrayWithArray:curruptFields]];
+                NSMutableArray *accessIdent = [NSMutableArray new];
+                for (id views in curruptFields) {
+                    [accessIdent addObject:[views accessibilityIdentifier]];
+                }
+                
+                NSMutableArray *textViews = [NSMutableArray new];
+                for (id views in [(UIScrollView*)self subviews]) {
+                    if ([views isKindOfClass:[MHTextView class]]) {
+                        if ([accessIdent containsObject:[views accessibilityIdentifier]]) {
+                            [textViews addObject:views];
+                        }
+                    }
+                }
+                [textViews addObjectsFromArray:curruptFields];
+                [self shakeObjects:[NSArray arrayWithArray:textViews]];
             }
         }
     }else{
@@ -755,16 +778,18 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
 }
 
--(void)setMHContentSizeOfScrollView
-{
-    CGRect rect = CGRectZero;
+-(void)MHAutoContentSizeForScrollView{
     
-    for(UIView * view in [(UIScrollView*)self subviews])
-    {
-        rect = CGRectUnion(rect, view.frame);
+    if ([self isKindOfClass:[UIScrollView class]]) {
+        CGRect rect = CGRectZero;
+        for(UIView * view in [(UIScrollView*)self subviews]){
+            rect = CGRectUnion(rect, view.frame);
+        }
+        
+        [(UIScrollView*)self setContentSize:CGSizeMake(rect.size.width, rect.size.height)];
+    }else{
+        NSLog(@"You can only set the ContentSize for ScrollViews");
     }
-    
-    [(UIScrollView*)self setContentSize:CGSizeMake(rect.size.width, rect.size.height)];
 }
 
 -(NSArray*)findAllTextFieldsInView:(UIView*)view{
@@ -825,7 +850,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     return fields;
 }
 
-- (void)shakeObjects:(id)objects{
+- (void)shakeObjects:(NSArray*)objects{
     
     for (id object in objects){
         CALayer *layer = [object layer];
