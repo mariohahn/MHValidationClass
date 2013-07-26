@@ -6,7 +6,8 @@ Setup
 
 Install MVValidation
 
-  [self.scrollView installMHValidationWithClasses:@[[UITextField class],
+		
+	[self.scrollView installMHValidationWithClasses:@[[UITextField class],
                                                       [UISwitch class],
                                                       [UISegmentedControl class],
                                                       [UITextView class]
@@ -14,16 +15,17 @@ Install MVValidation
                            setCustomizationBlock:^(MHTextObjectsCustomization *customization) {
 
                            }];
+
 Set AccessibilityIdentifiers 
 
 	self.firstName.accessibilityIdentifier = @"Vorname";
-   	 self.secondName.accessibilityIdentifier = @"Nachname";
-   	 self.email.accessibilityIdentifier = @"E-Mail";
-   	 self.PLZ.accessibilityIdentifier = @"Postleitzahl";
-   	 self.sex.accessibilityIdentifier = @"Geschlecht";
-   	 self.allow.accessibilityIdentifier = @"Erlauben";
-   	 self.problems.accessibilityIdentifier = @"Probleme";
-   	 self.phoneNumber.accessibilityIdentifier = @"Telefonnummer";	
+   	self.secondName.accessibilityIdentifier = @"Nachname";
+   	self.email.accessibilityIdentifier = @"E-Mail";
+   	self.PLZ.accessibilityIdentifier = @"Postleitzahl";
+   	self.sex.accessibilityIdentifier = @"Geschlecht";
+   	self.allow.accessibilityIdentifier = @"Erlauben";
+   	self.problems.accessibilityIdentifier = @"Probleme";
+   	self.phoneNumber.accessibilityIdentifier = @"Telefonnummer";	
 
 Validate
 
