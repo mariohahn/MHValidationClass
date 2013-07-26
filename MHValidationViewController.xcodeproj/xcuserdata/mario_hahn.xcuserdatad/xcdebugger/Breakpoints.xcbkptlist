@@ -160,29 +160,16 @@
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "No"
+         shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396344862.333537"
+         timestampString = "396492165.890909"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "489"
-         endingLineNumber = "489"
-         landmarkName = "-setCustomization:forObjects:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396305710.684354"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "26"
-         endingLineNumber = "26"
-         landmarkName = "-initWithFrame:customization:isSelected:"
+         startingLineNumber = "754"
+         endingLineNumber = "754"
+         landmarkName = "-validateWithNONMandatoryTextObjects:validateObjectsWithMHRegexObjects:switchesWhichMustBeON:curruptObjectBlock:successBlock:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -190,11 +177,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396344862.333537"
+         timestampString = "396482999.008073"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "390"
-         endingLineNumber = "390"
+         startingLineNumber = "408"
+         endingLineNumber = "408"
          landmarkName = "-keyboardWillShow:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -203,12 +190,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396344862.333537"
+         timestampString = "396484728.41239"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "401"
-         endingLineNumber = "401"
-         landmarkName = "-keyboardWillShow:"
+         startingLineNumber = "429"
+         endingLineNumber = "429"
+         landmarkName = "-adjustContentOffsetWithKeyBoardHeight:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -216,38 +203,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396344862.333537"
+         timestampString = "396492007.626561"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "276"
-         endingLineNumber = "276"
-         landmarkName = "-searchForObjectsOfClass:selectNextOrPrevObject:foundObjectBlock:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396344862.333537"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "361"
-         endingLineNumber = "361"
-         landmarkName = "-hideSegment:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396344862.333537"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "365"
-         endingLineNumber = "365"
-         landmarkName = "-hideSegment:"
+         startingLineNumber = "477"
+         endingLineNumber = "477"
+         landmarkName = "-setCustomization:forObjects:withStyle:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>
