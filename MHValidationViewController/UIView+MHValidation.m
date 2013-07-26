@@ -23,11 +23,14 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 @implementation MHTextView
 
--(id)initWithFrame:(CGRect)frame customization:(MHTextObjectsCustomization*)customization isSelected:(BOOL)isSelected{
+-(id)initWithFrame:(CGRect)frame
+     customization:(MHTextObjectsCustomization*)customization
+             style:(MHTextObjectsCustomizationStyle)style{
+    
     self = [super initWithFrame:frame];
     if (!self)
         return nil;
-    self.isSelected = isSelected;
+    self.style = style;
     self.customization = customization;
     self.backgroundColor = [UIColor clearColor];
     return self;
@@ -37,20 +40,30 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 -(void)drawRect:(CGRect)rect{
     
     
+    MHCustomizationDetail *customization = [MHCustomizationDetail new];
+    switch (self.style) {
+        case MHTextObjectsCustomizationStyleDefault:
+            customization = self.customization.defaultCustomization;
+            break;
+        case MHTextObjectsCustomizationStyleSelected:
+            customization = self.customization.selectedCustomization;
+            break;
+        case MHTextObjectsCustomizationStyleNonValidate:
+            customization = self.customization.nonValidCustomization;
+            break;
+            
+        default:
+            break;
+    }
+    
+    
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGContextRef context = UIGraphicsGetCurrentContext();
 
-    UIColor* gradientColorUp = self.customization.borderGradientColorUp;
-    UIColor* gradientColorDown = self.customization.borderGradientColorDow;
-    UIColor* backgroundColor = self.customization.backgroundColor;
-    UIColor* shadow = self.customization.innerShadowColor;
-    if (self.isSelected) {
-        gradientColorUp = self.customization.selectionGradientBorderColorUp;
-        gradientColorDown = self.customization.selectionGradientBorderColorDown;
-        backgroundColor = self.customization.selectionBackgroundColor;
-        shadow = self.customization.selectionInnerShadowColor;
-    }
-
+    UIColor* gradientColorUp = customization.borderGradientColorUp;
+    UIColor* gradientColorDown = customization.borderGradientColorDow;
+    UIColor* backgroundColor = customization.backgroundColor;
+    UIColor* shadow = customization.innerShadowColor;
     
     NSArray* gradientColorsForBorder = [NSArray arrayWithObjects:
                                 (id)gradientColorUp.CGColor,
@@ -63,13 +76,13 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     CGFloat shadowBlurRadius = 2.5;
 
     
-    UIBezierPath* borderGradientPath = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1, 1, rect.size.width-2, rect.size.height-2) cornerRadius: self.customization.cornerRadius];
+    UIBezierPath* borderGradientPath = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1, 1, rect.size.width-2, rect.size.height-2) cornerRadius: customization.cornerRadius];
     CGContextSaveGState(context);
     [borderGradientPath addClip];
     CGContextDrawLinearGradient(context, borderGradient, CGPointMake(((rect.size.width-2)/2)+1, 1), CGPointMake(((rect.size.width-2)/2)+1, 1+rect.size.height-2), 0);
     CGContextRestoreGState(context);
         
-    UIBezierPath* rectangle2Path = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1+self.customization.borderWidth, 1+self.customization.borderWidth, rect.size.width-((1+self.customization.borderWidth)*2), rect.size.height-((1+self.customization.borderWidth)*2)) cornerRadius: self.customization.cornerRadius];
+    UIBezierPath* rectangle2Path = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1+customization.borderWidth, 1+customization.borderWidth, rect.size.width-((1+customization.borderWidth)*2), rect.size.height-((1+customization.borderWidth)*2)) cornerRadius: customization.cornerRadius];
     [backgroundColor setFill];
     [rectangle2Path fill];
     
@@ -102,99 +115,55 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     CGColorSpaceRelease(colorSpace);
     
 }
-/*-(void)drawRect:(CGRect)rect{
-    
-    
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    UIColor* borderColor = self.customization.borderColor;
-    UIColor* fillColor = self.customization.backgroundColor;
-
-    if (self.isSelected) {
-        borderColor =  self.customization.selectionBorderColor;
-        fillColor = self.customization.selectionBackgroundColor;
-    }
-    
-    
-
-    
-    UIColor* innerShadowColor = self.customization.innerShadowColor;
-
-    UIColor* shadow = innerShadowColor;
-    CGSize shadowOffset = CGSizeMake(0.1, -0.1);
-    CGFloat shadowBlurRadius = 3.5;
-
-    
-    UIBezierPath* rectanglePath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(1, 1, rect.size.width-2, rect.size.height-2) cornerRadius: self.customization.cornerRadius];
-    [fillColor setFill];
-    [rectanglePath fill];
-    
-    CGRect rectangleBorderRect = CGRectInset([rectanglePath bounds], -shadowBlurRadius, -shadowBlurRadius);
-    rectangleBorderRect = CGRectOffset(rectangleBorderRect, -shadowOffset.width, -shadowOffset.height);
-    rectangleBorderRect = CGRectInset(CGRectUnion(rectangleBorderRect, [rectanglePath bounds]), -1, -1);
-    
-    UIBezierPath* rectangleNegativePath = [UIBezierPath bezierPathWithRect: rectangleBorderRect];
-    [rectangleNegativePath appendPath: rectanglePath];
-    rectangleNegativePath.usesEvenOddFillRule = YES;
-    
-    CGContextSaveGState(context);
-    {
-        CGFloat xOffset = shadowOffset.width + round(rectangleBorderRect.size.width);
-        CGFloat yOffset = shadowOffset.height;
-        CGContextSetShadowWithColor(context,
-                                    CGSizeMake(xOffset + copysign(0.1, xOffset), yOffset + copysign(0.1, yOffset)),
-                                    shadowBlurRadius,
-                                    shadow.CGColor);
-        
-        [rectanglePath addClip];
-        CGAffineTransform transform = CGAffineTransformMakeTranslation(-round(rectangleBorderRect.size.width), 0);
-        [rectangleNegativePath applyTransform: transform];
-        [[UIColor grayColor] setFill];
-        [rectangleNegativePath fill];
-    }
-    CGContextRestoreGState(context);
-    
-    [borderColor setStroke];
-    rectanglePath.lineWidth = self.customization.borderWidth;
-    [rectanglePath stroke];
-}*/
 
 @end
 
 
 @implementation MHTextObjectsCustomization
 
-- (id)initWithClassesForCustomization:(NSArray*)classes
-                      backgroundColor:(UIColor*)backgroundColor
-             selectionBackgroundColor:(UIColor*)selectionBackgroundColor
-                borderGradientColorUp:(UIColor*)borderGradientColorUp
-               borderGradientColorDow:(UIColor*)borderGradientColorDow
-       selectionGradientBorderColorUp:(UIColor*)selectionGradientBorderColorUp
-     selectionGradientBorderColorDown:(UIColor*)selectionGradientBorderColorDown
-                          borderWidth:(float)borderWidth
-                         cornerRadius:(float)cornerRadius
-                     innerShadowColor:(UIColor*)innerShadowColor
-            selectionInnerShadowColor:(UIColor*)selectionInnerShadowColor
-                           labelColor:(UIColor*)labelColor
-                            labelFont:(UIFont*)labelFont
-                  selectionLabelColor:(UIColor*)selectionLabelColor
+- (id)initWithClassesForCustomization:(NSArray*)classesToCustomize
+                 defaultCustomization:(MHCustomizationDetail*)defaultCustomization
+                selectedCustomization:(MHCustomizationDetail*)selectedCustomization
+                nonValidCustomization:(MHCustomizationDetail*)nonValidCustomization{
+    self = [super init];
+    if (!self)
+        return nil;
+    
+    self.classesToCustomize = classesToCustomize;
+    self.defaultCustomization = defaultCustomization;
+    self.selectedCustomization = selectedCustomization;
+    self.nonValidCustomization = nonValidCustomization;
+    return self;
+
+}
+
+
+
+@end
+
+
+@implementation MHCustomizationDetail
+
+- (id)initWithBackgroundColor:(UIColor*)backgroundColor
+        borderGradientColorUp:(UIColor*)borderGradientColorUp
+       borderGradientColorDow:(UIColor*)borderGradientColorDow
+                  borderWidth:(float)borderWidth
+                 cornerRadius:(float)cornerRadius
+             innerShadowColor:(UIColor*)innerShadowColor
+                   labelColor:(UIColor*)labelColor
+                    labelFont:(UIFont*)labelFont;
 {
     self = [super init];
     if (!self)
         return nil;
-    self.classes = classes;
     self.backgroundColor = backgroundColor;
-    self.selectionBackgroundColor = selectionBackgroundColor;
     self.borderGradientColorDow = borderGradientColorDow;
     self.borderGradientColorUp = borderGradientColorUp;
-    self.selectionGradientBorderColorDown = selectionGradientBorderColorDown;
-    self.selectionGradientBorderColorUp = selectionGradientBorderColorUp;
     self.borderWidth = borderWidth;
     self.cornerRadius = cornerRadius;
     self.innerShadowColor = innerShadowColor;
     self.labelColor = labelColor;
     self.labelFont = labelFont;
-    self.selectionLabelColor = selectionLabelColor;
-    self.selectionInnerShadowColor = selectionInnerShadowColor;
     return self;
 }
 
@@ -382,6 +351,16 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
 }
 -(void)dismissInputView{
+    if ([self isKindOfClass:[UIScrollView class]]) {
+        UIScrollView *sv = (UIScrollView*)self;
+        [UIView animateWithDuration:0.3 animations:^{
+            [sv setContentInset:UIEdgeInsetsMake(0, 0, 0, 0)];
+            [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
+
+        }];
+        }
+    [self setCustomization:self.textObjectsCustomization forObjects:@[[self findFirstResponderOnView:self]] withStyle:MHTextObjectsCustomizationStyleDefault];
+    
     [self endEditing:YES];
 }
 
@@ -394,9 +373,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         
         if (self.showNextAndPrevSegmentedControl) {
             [self setCustomization:self.textObjectsCustomization
-                        forObjects:[self findObjectsofClass:self.textObjectsCustomization.classes
-                                                     onView:self
-                                   showOnlyNonHiddenObjects:NO]];
+                        forObjects:@[[self findFirstResponderOnView:self] ]
+                         withStyle:MHTextObjectsCustomizationStyleSelected];
             id firstResponder = [self findFirstResponderOnView:self];
             if (![firstResponder inputAccessoryView]) {
                 [firstResponder becomeFirstResponder];
@@ -423,16 +401,14 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             
         }
     }else{
-        id firstResponder = [self findFirstResponderOnView:self];
-
         if ([self isKindOfClass:[UIScrollView class]]) {
+            CGRect keyborad = [[[not userInfo]objectForKey:@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
+            [self adjustContentOffsetWithKeyBoardHeight:keyborad.size.height];
             
-            [self adjustContentOffset];
-            
-            if (![firstResponder isKindOfClass:[UITextField class]]|| ![firstResponder isKindOfClass:[UITextView class]] || !firstResponder) {
-                UIScrollView *scroll = (UIScrollView*)self;
-                [scroll setContentInset:UIEdgeInsetsMake(scroll.contentInset.top, scroll.contentInset.left, scroll.contentInset.bottom+280, scroll.contentInset.right)];
-            }
+            UIScrollView *sv = (UIScrollView*)self;
+            [self MHAutoContentSizeForScrollView];
+            [sv setContentInset:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
+            [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
         }
     }
 }
@@ -440,18 +416,18 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 
 
--(void)adjustContentOffset{
+-(void)adjustContentOffsetWithKeyBoardHeight:(float)keyBoardHeight{
     UIScrollView *scroll = (UIScrollView*)self;
     
     id firstResponder = [self findFirstResponderOnView:self];
     
-    if([firstResponder frame].origin.y+[firstResponder frame].size.height<(self.bounds.size.height-[firstResponder inputAccessoryView].frame.size.height-250)){
-        [scroll setContentOffset:CGPointMake(0,0) animated:YES];
-    }else{
-        [scroll setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+265, 0)];
-        [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+265) animated:YES];
-    }
-    
+        if ((([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5)<0) {
+            [scroll setContentOffset:CGPointMake(0,0) animated:YES];
+
+        }else{
+        
+            [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.frame.size.height+keyBoardHeight+5) animated:YES];
+        }    
 }
 
 - (UIImage *)imageByRenderingView:(id)view{
@@ -478,17 +454,17 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 
 -(void)setCustomization:(MHTextObjectsCustomization*)customization
-             forObjects:(NSArray*)customizationObjects{
+             forObjects:(NSArray*)customizationObjects
+              withStyle:(MHTextObjectsCustomizationStyle)typeStyle{
     
-    for (id object in customizationObjects) {
-        BOOL isSelected =NO;
-        if (object == [self findFirstResponderOnView:self]) {
-            isSelected =YES;
-        }
-        
-        MHTextView *txtView = [[MHTextView alloc]initWithFrame:[object frame]
-                                                 customization:customization
-                                                    isSelected:isSelected];
+    
+        for (id object in customizationObjects) {
+           
+            
+            MHTextView *txtView = [[MHTextView alloc]initWithFrame:[object frame]
+                                                     customization:customization
+                                                             style:typeStyle];
+            
             if ([object isKindOfClass:[UITextField class]]) {
                 [object setBorderStyle:UITextBorderStyleNone];
                 [object setBackground:[self imageByRenderingView:txtView]];
@@ -499,37 +475,45 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                 [object setRightViewMode:UITextFieldViewModeAlways];
                 [object setBorderStyle:UITextBorderStyleNone];
             }else{
-                [object setBackgroundColor:[UIColor colorWithPatternImage:[self imageByRenderingView:txtView] ]];
+                for (id view in  [(UIScrollView*)self subviews]) {
+                    if ([view isKindOfClass:[MHTextView class]]) {
+                        if ([[view accessibilityIdentifier]isEqualToString:[object accessibilityIdentifier]]) {
+                            [view removeFromSuperview];
+                        }
+                    }
+                }
+                [txtView setAccessibilityIdentifier:[object accessibilityIdentifier]];
+                [self addSubview:txtView];
+                [self bringSubviewToFront:object];
+                [object setBackgroundColor:[UIColor clearColor]];
             }
-        
-            [object setFont:customization.labelFont];
-            [object setTextColor:customization.labelColor];
-
-            if (isSelected) {
-                [object setTextColor:customization.selectionLabelColor];
+            
+            MHCustomizationDetail *detail = [MHCustomizationDetail new];
+            switch (typeStyle) {
+                case MHTextObjectsCustomizationStyleDefault:
+                    detail = customization.defaultCustomization;
+                    break;
+                case MHTextObjectsCustomizationStyleSelected:
+                    detail = customization.selectedCustomization;
+                    break;
+                case MHTextObjectsCustomizationStyleNonValidate:
+                    detail = customization.defaultCustomization;
+                    break;
+                default:
+                    break;
             }
-    }
+            [object setFont:detail.labelFont];
+            [object setTextColor:detail.labelColor];
+        }
 }
-
-
-
--(void)doTextFieldShadowForObject:(id)object{
-    
-}
-
 
 -(void)keyboardWillHide:(id)sender{
-    [self setCustomization:self.textObjectsCustomization
-                forObjects:[self findObjectsofClass:self.textObjectsCustomization.classes
-                                             onView:self
-                           showOnlyNonHiddenObjects:NO]];
-    
-    if (self.showNextAndPrevSegmentedControl) {
-        if ([self isKindOfClass:[UIScrollView class]]) {
-            UIScrollView *scroll= (UIScrollView*)self;
-            [scroll setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
-            [scroll setContentInset:UIEdgeInsetsMake(0, 0, 0, 0)];
-            [scroll setContentOffset:CGPointMake(0, 0) animated:YES];
+    if ([sender object]) {
+        if ([[sender object]isKindOfClass:[UITextView class]] ||[[sender object]isKindOfClass:[UITextField class]]) {
+            [self setCustomization:self.textObjectsCustomization
+                        forObjects:@[[sender object]]
+                         withStyle:MHTextObjectsCustomizationStyleDefault];
+
         }
     }
 }
@@ -548,10 +532,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                              selector:@selector(keyboardWillShow:)
                                                  name:UIKeyboardWillShowNotification
                                                object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWillShow:)
-                                                 name:UIKeyboardDidShowNotification
-                                               object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWillHide:)
@@ -562,6 +542,13 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                              selector:@selector(keyboardWillHide:)
                                                  name:UITextFieldTextDidEndEditingNotification
                                                object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardDidHideNotification
+                                               object:nil];
+
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWillHide:)
                                                  name:UITextViewTextDidEndEditingNotification
@@ -570,12 +557,15 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         self.textObjectsCustomization = [self setDefaultCustomization];
         CustomizationBlock(self.textObjectsCustomization);
         [self setCustomization:self.textObjectsCustomization
-                    forObjects:[self findObjectsofClass:self.textObjectsCustomization.classes
+                    forObjects:[self findObjectsofClass:self.textObjectsCustomization.classesToCustomize
                                                  onView:self
-                               showOnlyNonHiddenObjects:NO]];
+                               showOnlyNonHiddenObjects:NO]
+                     withStyle:MHTextObjectsCustomizationStyleDefault];
         
 
     }
+
+    
     
     self.classObjects = typeOfClasses;
     [self findObjectsofClass:typeOfClasses
@@ -583,20 +573,42 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     showOnlyNonHiddenObjects:NO];
 }
 -(MHTextObjectsCustomization*)setDefaultCustomization{
-    return [[MHTextObjectsCustomization alloc]initWithClassesForCustomization:@[[UITextField class],[UITextView class]]
-                                                              backgroundColor:[UIColor whiteColor]
-                                                     selectionBackgroundColor:[UIColor whiteColor]
-                                                        borderGradientColorUp:[UIColor colorWithRed:0.65f green:0.64f blue:0.63f alpha:1.00f]
-                                                       borderGradientColorDow:[UIColor colorWithRed:0.91f green:0.89f blue:0.88f alpha:1.00f]
-                                               selectionGradientBorderColorUp:[UIColor colorWithRed:0.64f green:0.00f blue:0.00f alpha:1.00f]
-                                             selectionGradientBorderColorDown:[UIColor colorWithRed:0.94f green:0.30f blue:0.36f alpha:1.00f]
-                                                                  borderWidth:1
-                                                                 cornerRadius:8
-                                                             innerShadowColor:[UIColor grayColor]
-                                                    selectionInnerShadowColor:[UIColor redColor]
-                                                                   labelColor:[UIColor blackColor]
-                                                                    labelFont:[UIFont systemFontOfSize:12]
-                                                          selectionLabelColor:[UIColor blackColor]];
+    
+    MHCustomizationDetail *defaultCustomization =
+    [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
+                                     borderGradientColorUp:[UIColor colorWithRed:0.65f green:0.64f blue:0.63f alpha:1.00f]
+                                    borderGradientColorDow:[UIColor colorWithRed:0.91f green:0.89f blue:0.88f alpha:1.00f]
+                                               borderWidth:1
+                                              cornerRadius:8
+                                          innerShadowColor:[UIColor grayColor]
+                                                labelColor:[UIColor blackColor]
+                                                 labelFont:[UIFont systemFontOfSize:12]];
+    
+    MHCustomizationDetail *nonValidCustomization =
+    [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
+                                     borderGradientColorUp:[UIColor colorWithRed:0.64f green:0.00f blue:0.00f alpha:1.00f]
+                                    borderGradientColorDow:[UIColor colorWithRed:0.94f green:0.30f blue:0.36f alpha:1.00f]
+                                               borderWidth:1
+                                              cornerRadius:8
+                                          innerShadowColor:[UIColor redColor]
+                                                labelColor:[UIColor blackColor]
+                                                 labelFont:[UIFont systemFontOfSize:12]];
+    MHCustomizationDetail *selectedCustomization =
+    [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
+                                     borderGradientColorUp:[UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f]
+                                    borderGradientColorDow:[UIColor colorWithRed:0.61f green:1.00f blue:0.53f alpha:1.00f]
+                                               borderWidth:1
+                                              cornerRadius:8
+                                          innerShadowColor:[UIColor colorWithRed:0.61f green:1.00f blue:0.53f alpha:1.00f]
+                                                labelColor:[UIColor blackColor]
+                                                 labelFont:[UIFont systemFontOfSize:12]];
+    
+    
+    
+   return [[MHTextObjectsCustomization alloc]initWithClassesForCustomization:@[[UITextField class],[UITextView class]]
+                                                  defaultCustomization:defaultCustomization
+                                                 selectedCustomization:selectedCustomization
+                                                 nonValidCustomization:nonValidCustomization];
 }
 
 - (UIView*)findFirstResponderOnView:(UIView*)view {
@@ -703,7 +715,25 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         if (CurruptedObjectBlock) {
             CurruptedObjectBlock([NSArray arrayWithArray:curruptFields]);
             if (self.shouldShakeNonValidateObjects) {
-                [self shakeObjects:[NSArray arrayWithArray:curruptFields] shakeBorderColor:nil];
+                [self setCustomization:self.textObjectsCustomization
+                            forObjects:curruptFields
+                             withStyle:MHTextObjectsCustomizationStyleNonValidate];
+                
+                NSMutableArray *accessIdent = [NSMutableArray new];
+                for (id views in curruptFields) {
+                    [accessIdent addObject:[views accessibilityIdentifier]];
+                }
+                
+                NSMutableArray *textViews = [NSMutableArray new];
+                for (id views in [(UIScrollView*)self subviews]) {
+                    if ([views isKindOfClass:[MHTextView class]]) {
+                        if ([accessIdent containsObject:[views accessibilityIdentifier]]) {
+                            [textViews addObject:views];
+                        }
+                    }
+                }
+                [textViews addObjectsFromArray:curruptFields];
+                [self shakeObjects:[NSArray arrayWithArray:textViews]];
             }
         }
     }else{
@@ -724,8 +754,11 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                 if ([object isKindOfClass:[UISegmentedControl class]]) {
                     objectString = [object titleForSegmentAtIndex:[object selectedSegmentIndex]];
                 }
-                [dictMail setObject:objectString forKey:[object accessibilityIdentifier]];
-                stringForMail = [stringForMail stringByAppendingString:[NSString stringWithFormat:@"<br /><br />%@:         %@",[object accessibilityIdentifier],objectString ]];
+                if ([object accessibilityIdentifier]) {
+                    [dictMail setObject:objectString forKey:[object accessibilityIdentifier]];
+                    stringForMail = [stringForMail stringByAppendingString:[NSString stringWithFormat:@"<br /><br />%@:         %@",[object accessibilityIdentifier],objectString ]];
+                }
+               
             }
             bool isFirstRegistration =NO;
             if ([[NSUserDefaults standardUserDefaults]objectForKey:@"MHValidationStorage"]) {
@@ -744,6 +777,21 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         }
     }
 }
+
+-(void)MHAutoContentSizeForScrollView{
+    
+    if ([self isKindOfClass:[UIScrollView class]]) {
+        CGRect rect = CGRectZero;
+        for(UIView * view in [(UIScrollView*)self subviews]){
+            rect = CGRectUnion(rect, view.frame);
+        }
+        
+        [(UIScrollView*)self setContentSize:CGSizeMake(rect.size.width, rect.size.height)];
+    }else{
+        NSLog(@"You can only set the ContentSize for ScrollViews");
+    }
+}
+
 -(NSArray*)findAllTextFieldsInView:(UIView*)view{
     NSMutableArray *fields= [NSMutableArray new];
     for(id field in [view subviews]){
@@ -784,8 +832,10 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     }
                 }
                 if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
-                    if (self.showNextAndPrevSegmentedControl) {
-                        [field setDelegate:self];
+                    if (![field inputAccessoryView]) {                        
+                        UIToolbar *toolBar = [self toolbarInit];
+                        [toolBar sizeToFit];
+                        [field setInputAccessoryView:toolBar];
                     }
                 }
             }
@@ -800,14 +850,11 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     return fields;
 }
 
-- (void)shakeObjects:(id)objects
-    shakeBorderColor:(UIColor*)borderColor{
+- (void)shakeObjects:(NSArray*)objects{
     
     for (id object in objects){
         CALayer *layer = [object layer];
-        if (borderColor) {
-            [layer setBorderColor:[borderColor CGColor]];
-        }
+
         CGPoint pos = layer.position;
         static int numberOfShakes = 4;
         CAKeyframeAnimation *shakeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
