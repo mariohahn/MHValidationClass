@@ -164,25 +164,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396525560.752221"
+         timestampString = "396534850.213192"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "777"
-         endingLineNumber = "777"
+         startingLineNumber = "798"
+         endingLineNumber = "798"
          landmarkName = "-validateWithNONMandatoryTextObjects:validateObjectsWithMHRegexObjects:switchesWhichMustBeON:curruptObjectBlock:successBlock:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "MHValidationViewController/UIView+MHValidation.m"
-         timestampString = "396525560.752221"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "488"
-         endingLineNumber = "488"
-         landmarkName = "-setCustomization:forObjects:withStyle:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

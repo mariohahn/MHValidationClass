@@ -20,6 +20,7 @@ typedef NS_ENUM(NSUInteger, MHSelectedObjectType) {
     MHSelectedObjectTypeMiddle
 };
 
+
 typedef NS_ENUM(NSUInteger, MHSelectionType) {
     MHSelectionTypeNext,
     MHSelectionTypePrev,
@@ -64,6 +65,7 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 @interface MHTextObjectsCustomization : NSObject
 
 @property (nonatomic,strong) NSArray *classesToCustomize;
+@property (nonatomic) float animationDuration;
 
 @property (nonatomic,strong) MHCustomizationDetail *defaultCustomization;
 @property (nonatomic,strong) MHCustomizationDetail *selectedCustomization;
@@ -72,7 +74,8 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 - (id)initWithClassesForCustomization:(NSArray*)classesToCustomize
                  defaultCustomization:(MHCustomizationDetail*)defaultCustomization
                 selectedCustomization:(MHCustomizationDetail*)selectedCustomization
-                nonValidCustomization:(MHCustomizationDetail*)nonValidCustomization;
+                nonValidCustomization:(MHCustomizationDetail*)nonValidCustomization
+                    animationDuration:(float)animationDuration;
 
 @end
 

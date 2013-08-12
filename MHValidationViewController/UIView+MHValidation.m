@@ -81,6 +81,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     [borderGradientPath addClip];
     CGContextDrawLinearGradient(context, borderGradient, CGPointMake(((rect.size.width-2)/2)+1, 1), CGPointMake(((rect.size.width-2)/2)+1, 1+rect.size.height-2), 0);
     CGContextRestoreGState(context);
+    
         
     UIBezierPath* rectangle2Path = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1+customization.borderWidth, 1+customization.borderWidth, rect.size.width-((1+customization.borderWidth)*2), rect.size.height-((1+customization.borderWidth)*2)) cornerRadius: customization.cornerRadius];
     [backgroundColor setFill];
@@ -124,11 +125,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 - (id)initWithClassesForCustomization:(NSArray*)classesToCustomize
                  defaultCustomization:(MHCustomizationDetail*)defaultCustomization
                 selectedCustomization:(MHCustomizationDetail*)selectedCustomization
-                nonValidCustomization:(MHCustomizationDetail*)nonValidCustomization{
+                nonValidCustomization:(MHCustomizationDetail*)nonValidCustomization
+                    animationDuration:(float)animationDuration{
     self = [super init];
     if (!self)
         return nil;
-    
+    self.animationDuration = animationDuration;
     self.classesToCustomize = classesToCustomize;
     self.defaultCustomization = defaultCustomization;
     self.selectedCustomization = selectedCustomization;
@@ -359,11 +361,14 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
         }];
         }
-    [self setCustomization:self.textObjectsCustomization forObjects:@[[self findFirstResponderOnView:self]] withStyle:MHTextObjectsCustomizationStyleDefault];
+
+    
+    [self setCustomization:self.textObjectsCustomization
+                forObjects:@[[self findFirstResponderOnView:self]]
+                 withStyle:MHTextObjectsCustomizationStyleDefault];
     
     [self endEditing:YES];
 }
-
 
 
 -(void)keyboardWillShow:(NSNotification*)not{
@@ -453,10 +458,11 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 
 
+
+
 -(void)setCustomization:(MHTextObjectsCustomization*)customization
              forObjects:(NSArray*)customizationObjects
               withStyle:(MHTextObjectsCustomizationStyle)typeStyle{
-    
     
         for (id object in customizationObjects) {
            
@@ -466,8 +472,19 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                              style:typeStyle];
             
             if ([object isKindOfClass:[UITextField class]]) {
+                NSLog(@"%@",[object subviews]);
+                NSLog(@"%@",[[object layer] sublayers]);
                 [object setBorderStyle:UITextBorderStyleNone];
-                [object setBackground:[self imageByRenderingView:txtView]];
+                if (![(UITextField*)object background]) {
+                    [object setBackground:[self imageByRenderingView:txtView]];
+                }else{
+                    CATransition *animation = [CATransition animation];
+                    animation.duration = customization.animationDuration;
+                    animation.type = kCATransitionFade;
+                    [[object layer] addAnimation:animation forKey:@"imageFade"];
+                    [object setBackground:[self imageByRenderingView:txtView]];
+                }
+
                 UIView *paddingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 20)];
                 [object setLeftView:paddingView];
                 [object setLeftViewMode:UITextFieldViewModeAlways];
@@ -475,6 +492,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                 [object setRightViewMode:UITextFieldViewModeAlways];
                 [object setBorderStyle:UITextBorderStyleNone];
             }else{
+                
                 for (id view in  [(UIScrollView*)self subviews]) {
                     if ([view isKindOfClass:[MHTextView class]]) {
                         if ([[view accessibilityIdentifier]isEqualToString:[object accessibilityIdentifier]]) {
@@ -482,6 +500,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                         }
                     }
                 }
+                
+                
                 [txtView setAccessibilityIdentifier:[object accessibilityIdentifier]];
                 [self addSubview:txtView];
                 [self bringSubviewToFront:object];
@@ -608,7 +628,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
    return [[MHTextObjectsCustomization alloc]initWithClassesForCustomization:@[[UITextField class],[UITextView class]]
                                                   defaultCustomization:defaultCustomization
                                                  selectedCustomization:selectedCustomization
-                                                 nonValidCustomization:nonValidCustomization];
+                                                 nonValidCustomization:nonValidCustomization
+                                                           animationDuration:0.3];
 }
 
 - (UIView*)findFirstResponderOnView:(UIView*)view {
@@ -641,6 +662,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 -(UISegmentedControl *)prevNextSegment {
     UISegmentedControl*  prevNextSegment = [[UISegmentedControl alloc] initWithItems:@[ NSLocalizedString(@"Zurück", nil), NSLocalizedString(@"Weiter", nil) ]];
     prevNextSegment.momentary = YES;
+    [prevNextSegment setTintColor:[UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f]];
     prevNextSegment.segmentedControlStyle = UISegmentedControlStyleBar;
     
     [prevNextSegment addTarget:self
@@ -664,6 +686,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                               target:self
                                                                               action:@selector(dismissInputView)];
+    [doneItem setTintColor:[UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f]];
     
     [barItems addObject:doneItem];
     [toolbar setItems:barItems animated:NO];
