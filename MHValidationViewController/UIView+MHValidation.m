@@ -792,19 +792,20 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
 }
 
--(NSArray*)findAllTextFieldsInView:(UIView*)view{
-    NSMutableArray *fields= [NSMutableArray new];
-    for(id field in [view subviews]){
-        if([field isKindOfClass:[UITextField class]])
-            if (![fields containsObject:field]) {
-                [fields addObject:field];
-            }
-        if([field respondsToSelector:@selector(subviews)]){
-            [self findAllTextFieldsInView:field];
-        }
-    }
-    return fields;
-}
+// NEVER USED?
+//-(NSArray*)findAllTextFieldsInView:(UIView*)view{
+//    NSMutableArray *fields= [NSMutableArray new];
+//    for(id field in [view subviews]){
+//        if([field isKindOfClass:[UITextField class]])
+//            if (![fields containsObject:field]) {
+//                [fields addObject:field];
+//            }
+//        if([field respondsToSelector:@selector(subviews)]){
+//            [self findAllTextFieldsInView:field];
+//        }
+//    }
+//    return fields;
+//}
 
 -(NSArray*)findObjectsofClass:(NSArray*)classArray
                        onView:(UIView*)view
@@ -812,6 +813,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     
     
     NSMutableArray *fields= [NSMutableArray new];
+
+    [self addObjectsToArray:fields forClassArray:classArray onView:view showOnlyNonHiddenObjects:nonHidden];
+    return fields;
+}
+
+- (void)addObjectsToArray:(NSMutableArray*)fields forClassArray:(NSArray*)classArray onView:(UIView*)view showOnlyNonHiddenObjects:(BOOL)nonHidden {
     for(id field in [view subviews]){
         for (id class in classArray) {
             if([field isKindOfClass:class]){
@@ -832,22 +839,24 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     }
                 }
                 if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
-                    if (![field inputAccessoryView]) {                        
+                    if (![field inputAccessoryView]) {
                         UIToolbar *toolBar = [self toolbarInit];
                         [toolBar sizeToFit];
                         [field setInputAccessoryView:toolBar];
                     }
                 }
             }
-            if([field respondsToSelector:@selector(subviews)]){
-                [self findObjectsofClass:classArray
-                                  onView:field
-                showOnlyNonHiddenObjects:nonHidden];
-                
+            else {
+                if([field respondsToSelector:@selector(subviews)]){
+                    
+                    UIView *childView = (UIView*)field;
+                    
+                    [self addObjectsToArray:fields forClassArray:classArray onView:childView showOnlyNonHiddenObjects:nonHidden];
+                }
             }
         }
+
     }
-    return fields;
 }
 
 - (void)shakeObjects:(NSArray*)objects{
