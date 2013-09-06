@@ -494,8 +494,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                              style:typeStyle];
             
             if ([object isKindOfClass:[UITextField class]]) {
-                NSLog(@"%@",[object subviews]);
-                NSLog(@"%@",[[object layer] sublayers]);
                 [object setBorderStyle:UITextBorderStyleNone];
                 if (![(UITextField*)object background]) {
                     [object setBackground:[self imageByRenderingView:txtView]];
