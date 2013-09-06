@@ -244,7 +244,10 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [classesOnlyText addObject:classFromClasses];
         }
     }
-    NSArray *allObjectsWhichAreKindOfClasses = [self findObjectsofClass:classesOnlyText onView:self showOnlyNonHiddenObjects:YES];
+    NSArray *allObjectsWhichAreKindOfClasses = [self findObjectsofClass:classesOnlyText
+                                                                 onView:self
+                                               showOnlyNonHiddenObjects:YES
+                                                                 fields:nil];
     if (allObjectsWhichAreKindOfClasses.count<=1) {
         [self hideSegment:YES];
     }else{
@@ -252,10 +255,23 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
     
     NSComparator comparatorBlock = ^(id obj1, id obj2) {
-        if ([obj1 frame].origin.y > [obj2 frame].origin.y) {
+        
+        CGRect obj1Frame = [obj1 frame];
+        CGRect obj2Frame = [obj2 frame];
+
+        if (![[obj1 superview] isEqual:self]) {
+            
+            obj1Frame = [[obj1 superview] convertRect:[obj1 frame] toView:self];
+        }
+        if (![[obj2 superview] isEqual:self]) {
+            
+            obj2Frame = [[obj2 superview] convertRect:[obj2 frame] toView:self];
+        }
+        
+        if (obj1Frame.origin.y > obj2Frame.origin.y) {
             return (NSComparisonResult)NSOrderedDescending;
         }
-        if ([obj1 frame].origin.y < [obj2 frame].origin.y) {
+        if (obj1Frame.origin.y < obj2Frame.origin.y) {
             return (NSComparisonResult)NSOrderedAscending;
         }
         return (NSComparisonResult)NSOrderedSame;
@@ -263,6 +279,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     id objectWhichShouldBecomeFirstResponder= nil;
     NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:allObjectsWhichAreKindOfClasses];
     [fieldsSort sortUsingComparator:comparatorBlock];
+    
     for (id viewsAndFields in fieldsSort) {
         if (([viewsAndFields frame].origin.y == [selectedObject frame].origin.y)&&([viewsAndFields frame].origin.x > [selectedObject frame].origin.x) ) {
             objectWhichShouldBecomeFirstResponder = viewsAndFields;
@@ -295,7 +312,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             int index = [fieldsSort indexOfObject:[self findFirstResponderOnView:self]];
             objectWhichShouldBecomeFirstResponder = [fieldsSort objectAtIndex:index-1];
             FoundObjectBlock(objectWhichShouldBecomeFirstResponder,MHSelectedObjectTypeMiddle);
-            
             return;
         }
         
@@ -362,7 +378,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         }];
         }
 
-    
     [self setCustomization:self.textObjectsCustomization
                 forObjects:@[[self findFirstResponderOnView:self]]
                  withStyle:MHTextObjectsCustomizationStyleDefault];
@@ -464,6 +479,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
              forObjects:(NSArray*)customizationObjects
               withStyle:(MHTextObjectsCustomizationStyle)typeStyle{
     
+    if (customization) {
         for (id object in customizationObjects) {
            
             
@@ -525,6 +541,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [object setFont:detail.labelFont];
             [object setTextColor:detail.labelColor];
         }
+    }
 }
 
 -(void)keyboardWillHide:(id)sender{
@@ -573,16 +590,16 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                              selector:@selector(keyboardWillHide:)
                                                  name:UITextViewTextDidEndEditingNotification
                                                object:nil];
+
     if (CustomizationBlock) {
         self.textObjectsCustomization = [self setDefaultCustomization];
         CustomizationBlock(self.textObjectsCustomization);
         [self setCustomization:self.textObjectsCustomization
                     forObjects:[self findObjectsofClass:self.textObjectsCustomization.classesToCustomize
                                                  onView:self
-                               showOnlyNonHiddenObjects:NO]
+                               showOnlyNonHiddenObjects:NO
+                                                 fields:nil]
                      withStyle:MHTextObjectsCustomizationStyleDefault];
-        
-
     }
 
     
@@ -590,9 +607,13 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     self.classObjects = typeOfClasses;
     [self findObjectsofClass:typeOfClasses
                       onView:self
-    showOnlyNonHiddenObjects:NO];
+    showOnlyNonHiddenObjects:NO
+                      fields:nil];
 }
+
+
 -(MHTextObjectsCustomization*)setDefaultCustomization{
+    
     
     MHCustomizationDetail *defaultCustomization =
     [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
@@ -707,7 +728,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     
     NSArray *fields = [self findObjectsofClass:self.classObjects
                                         onView:self
-                      showOnlyNonHiddenObjects:YES];
+                      showOnlyNonHiddenObjects:YES
+                                        fields:nil];
     
     
     NSMutableArray *curruptFields = [NSMutableArray new];
@@ -737,7 +759,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     if (curruptFields.count) {
         if (CurruptedObjectBlock) {
             CurruptedObjectBlock([NSArray arrayWithArray:curruptFields]);
-            if (self.shouldShakeNonValidateObjects) {
                 [self setCustomization:self.textObjectsCustomization
                             forObjects:curruptFields
                              withStyle:MHTextObjectsCustomizationStyleNonValidate];
@@ -756,6 +777,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     }
                 }
                 [textViews addObjectsFromArray:curruptFields];
+            if (self.shouldShakeNonValidateObjects) {
                 [self shakeObjects:[NSArray arrayWithArray:textViews]];
             }
         }
@@ -831,10 +853,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 -(NSArray*)findObjectsofClass:(NSArray*)classArray
                        onView:(UIView*)view
-     showOnlyNonHiddenObjects:(BOOL)nonHidden{
+     showOnlyNonHiddenObjects:(BOOL)nonHidden
+                       fields:(NSMutableArray*)fields{
     
-    
-    NSMutableArray *fields= [NSMutableArray new];
+    if (!fields) {
+        fields= [NSMutableArray new];
+    }
     for(id field in [view subviews]){
         for (id class in classArray) {
             if([field isKindOfClass:class]){
@@ -865,8 +889,9 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             if([field respondsToSelector:@selector(subviews)]){
                 [self findObjectsofClass:classArray
                                   onView:field
-                showOnlyNonHiddenObjects:nonHidden];
-                
+                showOnlyNonHiddenObjects:nonHidden
+                                  fields:fields];
+
             }
         }
     }

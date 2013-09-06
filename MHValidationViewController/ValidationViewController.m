@@ -16,10 +16,21 @@
 
 @implementation ValidationViewController
 
+
+
+
+-(void)allowChanged:(UISwitch*)allow{
+    if ([allow isOn]) {
+        [self.scrollView setShouldShakeNonValidateObjects:YES];
+    }else{
+        [self.scrollView setShouldShakeNonValidateObjects:NO];
+    }
+}
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
+    [self.allow addTarget:self action:@selector(allowChanged:) forControlEvents:UIControlEventValueChanged];
     
     [self.validateButton addTarget:self action:@selector(validateButtonAction) forControlEvents:UIControlEventTouchUpInside];
     
@@ -48,8 +59,7 @@
                                                       [UITextView class]
                                                         ]
                            setCustomizationBlock:^(MHTextObjectsCustomization *customization) {
-                               
-                               
+                        
                                /*****************************************************************************************
                                 You can Change the look of an TextView and Textfield 
                                 MHTextObjectsCustomization is changing the style of UITextFields and UITextViews by default.
@@ -78,7 +88,6 @@
     /****************************************************************************************************************************
      Shake all NonValidateObjects automatic
      ****************************************************************************************************************************/
-
     [self.scrollView setShouldShakeNonValidateObjects:YES];
     
     /****************************************************************************************************************************

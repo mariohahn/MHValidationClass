@@ -192,7 +192,8 @@ Shake all objects from the objects Array
 
 -(NSArray*)findObjectsofClass:(NSArray*)classArray
                        onView:(UIView*)view
-     showOnlyNonHiddenObjects:(BOOL)nonHidden;
+     showOnlyNonHiddenObjects:(BOOL)nonHidden
+                       fields:(NSMutableArray*)fields;
 
 /****************************************************************************************************************************
 **************************************************    REQUIRED Methode     ************************************************** 
