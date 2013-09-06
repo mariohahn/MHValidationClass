@@ -228,6 +228,20 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFIER);
 }
 
+- (CGRect)determineFrameForObject:(id)obj {
+    
+    UIView *view = (UIView*)obj;
+    
+    while (![[view superview] isEqual:self]) {
+        view = [view superview];
+    }
+    
+    CGRect frame = [view convertRect:[view frame] toView:self];
+    
+    return frame;
+}
+
+
 -(void)searchForObjectsOfClass:(NSArray*)classes
         selectNextOrPrevObject:(MHSelectionType)selectionType
               foundObjectBlock:(void(^)(id object,
@@ -250,23 +264,38 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
     
     NSComparator comparatorBlock = ^(id obj1, id obj2) {
-        if ([obj1 frame].origin.y > [obj2 frame].origin.y) {
+        
+        CGRect fromRect1 = [self determineFrameForObject:obj1];
+        
+        CGRect fromRect2 = [self determineFrameForObject:obj2];
+        
+        if (fromRect1.origin.y > fromRect2.origin.y) {
             return (NSComparisonResult)NSOrderedDescending;
         }
-        if ([obj1 frame].origin.y < [obj2 frame].origin.y) {
+        if (fromRect1.origin.y < fromRect2.origin.y) {
             return (NSComparisonResult)NSOrderedAscending;
         }
         return (NSComparisonResult)NSOrderedSame;
     };
     id objectWhichShouldBecomeFirstResponder= nil;
     NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:allObjectsWhichAreKindOfClasses];
+    
+    NSLog(@"fieldsSort: %@", fieldsSort);
+    
     [fieldsSort sortUsingComparator:comparatorBlock];
+    
+    NSLog(@"fieldsSort: %@", fieldsSort);
+    
     for (id viewsAndFields in fieldsSort) {
-        if (([viewsAndFields frame].origin.y == [selectedObject frame].origin.y)&&([viewsAndFields frame].origin.x > [selectedObject frame].origin.x) ) {
+        
+        CGRect frameViewOrField = [self determineFrameForObject:viewsAndFields];
+        CGRect frameSelectedObject = [self determineFrameForObject:selectedObject];
+        
+        if ((frameViewOrField.origin.y == frameSelectedObject.origin.y)&&(frameViewOrField.origin.x > frameSelectedObject.origin.x) ) {
             objectWhichShouldBecomeFirstResponder = viewsAndFields;
             break;
         }
-        if (([viewsAndFields frame].origin.y > [selectedObject frame].origin.y) ) {
+        if ((frameViewOrField.origin.y > frameSelectedObject.origin.y) ) {
             objectWhichShouldBecomeFirstResponder = viewsAndFields;
             break;
         }
@@ -792,19 +821,20 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
 }
 
--(NSArray*)findAllTextFieldsInView:(UIView*)view{
-    NSMutableArray *fields= [NSMutableArray new];
-    for(id field in [view subviews]){
-        if([field isKindOfClass:[UITextField class]])
-            if (![fields containsObject:field]) {
-                [fields addObject:field];
-            }
-        if([field respondsToSelector:@selector(subviews)]){
-            [self findAllTextFieldsInView:field];
-        }
-    }
-    return fields;
-}
+// NEVER USED?
+//-(NSArray*)findAllTextFieldsInView:(UIView*)view{
+//    NSMutableArray *fields= [NSMutableArray new];
+//    for(id field in [view subviews]){
+//        if([field isKindOfClass:[UITextField class]])
+//            if (![fields containsObject:field]) {
+//                [fields addObject:field];
+//            }
+//        if([field respondsToSelector:@selector(subviews)]){
+//            [self findAllTextFieldsInView:field];
+//        }
+//    }
+//    return fields;
+//}
 
 -(NSArray*)findObjectsofClass:(NSArray*)classArray
                        onView:(UIView*)view
@@ -812,6 +842,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     
     
     NSMutableArray *fields= [NSMutableArray new];
+
+    [self addObjectsToArray:fields forClassArray:classArray onView:view showOnlyNonHiddenObjects:nonHidden];
+    return fields;
+}
+
+- (void)addObjectsToArray:(NSMutableArray*)fields forClassArray:(NSArray*)classArray onView:(UIView*)view showOnlyNonHiddenObjects:(BOOL)nonHidden {
     for(id field in [view subviews]){
         for (id class in classArray) {
             if([field isKindOfClass:class]){
@@ -832,22 +868,24 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     }
                 }
                 if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
-                    if (![field inputAccessoryView]) {                        
+                    if (![field inputAccessoryView]) {
                         UIToolbar *toolBar = [self toolbarInit];
                         [toolBar sizeToFit];
                         [field setInputAccessoryView:toolBar];
                     }
                 }
             }
-            if([field respondsToSelector:@selector(subviews)]){
-                [self findObjectsofClass:classArray
-                                  onView:field
-                showOnlyNonHiddenObjects:nonHidden];
-                
+            else {
+                if([field respondsToSelector:@selector(subviews)]){
+                    
+                    UIView *childView = (UIView*)field;
+                    
+                    [self addObjectsToArray:fields forClassArray:classArray onView:childView showOnlyNonHiddenObjects:nonHidden];
+                }
             }
         }
+
     }
-    return fields;
 }
 
 - (void)shakeObjects:(NSArray*)objects{
