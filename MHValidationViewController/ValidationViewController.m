@@ -31,6 +31,7 @@
     [super viewDidLoad];
     
     [self.allow addTarget:self action:@selector(allowChanged:) forControlEvents:UIControlEventValueChanged];
+    
     [self.validateButton addTarget:self action:@selector(validateButtonAction) forControlEvents:UIControlEventTouchUpInside];
     
     /****************************************************************************************************************************
