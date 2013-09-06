@@ -248,11 +248,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MHValidationViewController/UIView+MHValidation.m"
-            timestampString = "400148291.948929"
+            timestampString = "400150160.613788"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "593"
-            endingLineNumber = "593"
+            startingLineNumber = "599"
+            endingLineNumber = "599"
             landmarkName = "-installMHValidationWithClasses:setCustomizationBlock:"
             landmarkType = "5">
          </BreakpointContent>

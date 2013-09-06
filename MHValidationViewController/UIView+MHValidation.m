@@ -230,6 +230,17 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFIER);
 }
 
+
+- (CGRect)determineFrameForObject:(id)obj {
+    UIView *view = (UIView*)obj;
+    while (![[view superview] isEqual:self]) {
+            view = [view superview];
+        }
+    CGRect frame = [view convertRect:[view frame] toView:self];
+    return frame;
+}
+
+
 -(void)searchForObjectsOfClass:(NSArray*)classes
         selectNextOrPrevObject:(MHSelectionType)selectionType
               foundObjectBlock:(void(^)(id object,
@@ -256,18 +267,9 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     
     NSComparator comparatorBlock = ^(id obj1, id obj2) {
         
-        CGRect obj1Frame = [obj1 frame];
-        CGRect obj2Frame = [obj2 frame];
+        CGRect obj1Frame = [self determineFrameForObject:obj1];
+        CGRect obj2Frame = [self determineFrameForObject:obj2];
 
-        if (![[obj1 superview] isEqual:self]) {
-            
-            obj1Frame = [[obj1 superview] convertRect:[obj1 frame] toView:self];
-        }
-        if (![[obj2 superview] isEqual:self]) {
-            
-            obj2Frame = [[obj2 superview] convertRect:[obj2 frame] toView:self];
-        }
-        
         if (obj1Frame.origin.y > obj2Frame.origin.y) {
             return (NSComparisonResult)NSOrderedDescending;
         }
@@ -280,12 +282,16 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:allObjectsWhichAreKindOfClasses];
     [fieldsSort sortUsingComparator:comparatorBlock];
     
+    CGRect frameSelectedObject = [self determineFrameForObject:selectedObject];
+
     for (id viewsAndFields in fieldsSort) {
-        if (([viewsAndFields frame].origin.y == [selectedObject frame].origin.y)&&([viewsAndFields frame].origin.x > [selectedObject frame].origin.x) ) {
+        
+        CGRect frameViewOrField = [self determineFrameForObject:viewsAndFields];
+        if ((frameViewOrField.origin.y == frameSelectedObject.origin.y)&&(frameViewOrField.origin.x > frameSelectedObject.origin.x) ) {
             objectWhichShouldBecomeFirstResponder = viewsAndFields;
             break;
         }
-        if (([viewsAndFields frame].origin.y > [selectedObject frame].origin.y) ) {
+        if ((frameViewOrField.origin.y > frameSelectedObject.origin.y) ) {
             objectWhichShouldBecomeFirstResponder = viewsAndFields;
             break;
         }
