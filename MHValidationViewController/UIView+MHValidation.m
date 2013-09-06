@@ -81,6 +81,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     [borderGradientPath addClip];
     CGContextDrawLinearGradient(context, borderGradient, CGPointMake(((rect.size.width-2)/2)+1, 1), CGPointMake(((rect.size.width-2)/2)+1, 1+rect.size.height-2), 0);
     CGContextRestoreGState(context);
+    
         
     UIBezierPath* rectangle2Path = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1+customization.borderWidth, 1+customization.borderWidth, rect.size.width-((1+customization.borderWidth)*2), rect.size.height-((1+customization.borderWidth)*2)) cornerRadius: customization.cornerRadius];
     [backgroundColor setFill];
@@ -124,11 +125,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 - (id)initWithClassesForCustomization:(NSArray*)classesToCustomize
                  defaultCustomization:(MHCustomizationDetail*)defaultCustomization
                 selectedCustomization:(MHCustomizationDetail*)selectedCustomization
-                nonValidCustomization:(MHCustomizationDetail*)nonValidCustomization{
+                nonValidCustomization:(MHCustomizationDetail*)nonValidCustomization
+                    animationDuration:(float)animationDuration{
     self = [super init];
     if (!self)
         return nil;
-    
+    self.animationDuration = animationDuration;
     self.classesToCustomize = classesToCustomize;
     self.defaultCustomization = defaultCustomization;
     self.selectedCustomization = selectedCustomization;
@@ -228,6 +230,17 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFIER);
 }
 
+
+- (CGRect)determineFrameForObject:(id)obj {
+    UIView *view = (UIView*)obj;
+    while (![[view superview] isEqual:self]) {
+            view = [view superview];
+        }
+    CGRect frame = [view convertRect:[view frame] toView:self];
+    return frame;
+}
+
+
 -(void)searchForObjectsOfClass:(NSArray*)classes
         selectNextOrPrevObject:(MHSelectionType)selectionType
               foundObjectBlock:(void(^)(id object,
@@ -242,7 +255,10 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [classesOnlyText addObject:classFromClasses];
         }
     }
-    NSArray *allObjectsWhichAreKindOfClasses = [self findObjectsofClass:classesOnlyText onView:self showOnlyNonHiddenObjects:YES];
+    NSArray *allObjectsWhichAreKindOfClasses = [self findObjectsofClass:classesOnlyText
+                                                                 onView:self
+                                               showOnlyNonHiddenObjects:YES
+                                                                 fields:nil];
     if (allObjectsWhichAreKindOfClasses.count<=1) {
         [self hideSegment:YES];
     }else{
@@ -250,10 +266,14 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
     
     NSComparator comparatorBlock = ^(id obj1, id obj2) {
-        if ([obj1 frame].origin.y > [obj2 frame].origin.y) {
+        
+        CGRect obj1Frame = [self determineFrameForObject:obj1];
+        CGRect obj2Frame = [self determineFrameForObject:obj2];
+
+        if (obj1Frame.origin.y > obj2Frame.origin.y) {
             return (NSComparisonResult)NSOrderedDescending;
         }
-        if ([obj1 frame].origin.y < [obj2 frame].origin.y) {
+        if (obj1Frame.origin.y < obj2Frame.origin.y) {
             return (NSComparisonResult)NSOrderedAscending;
         }
         return (NSComparisonResult)NSOrderedSame;
@@ -261,12 +281,17 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     id objectWhichShouldBecomeFirstResponder= nil;
     NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:allObjectsWhichAreKindOfClasses];
     [fieldsSort sortUsingComparator:comparatorBlock];
+    
+    CGRect frameSelectedObject = [self determineFrameForObject:selectedObject];
+
     for (id viewsAndFields in fieldsSort) {
-        if (([viewsAndFields frame].origin.y == [selectedObject frame].origin.y)&&([viewsAndFields frame].origin.x > [selectedObject frame].origin.x) ) {
+        
+        CGRect frameViewOrField = [self determineFrameForObject:viewsAndFields];
+        if ((frameViewOrField.origin.y == frameSelectedObject.origin.y)&&(frameViewOrField.origin.x > frameSelectedObject.origin.x) ) {
             objectWhichShouldBecomeFirstResponder = viewsAndFields;
             break;
         }
-        if (([viewsAndFields frame].origin.y > [selectedObject frame].origin.y) ) {
+        if ((frameViewOrField.origin.y > frameSelectedObject.origin.y) ) {
             objectWhichShouldBecomeFirstResponder = viewsAndFields;
             break;
         }
@@ -293,7 +318,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             int index = [fieldsSort indexOfObject:[self findFirstResponderOnView:self]];
             objectWhichShouldBecomeFirstResponder = [fieldsSort objectAtIndex:index-1];
             FoundObjectBlock(objectWhichShouldBecomeFirstResponder,MHSelectedObjectTypeMiddle);
-            
             return;
         }
         
@@ -359,11 +383,13 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
         }];
         }
-    [self setCustomization:self.textObjectsCustomization forObjects:@[[self findFirstResponderOnView:self]] withStyle:MHTextObjectsCustomizationStyleDefault];
+
+    [self setCustomization:self.textObjectsCustomization
+                forObjects:@[[self findFirstResponderOnView:self]]
+                 withStyle:MHTextObjectsCustomizationStyleDefault];
     
     [self endEditing:YES];
 }
-
 
 
 -(void)keyboardWillShow:(NSNotification*)not{
@@ -453,11 +479,13 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 
 
+
+
 -(void)setCustomization:(MHTextObjectsCustomization*)customization
              forObjects:(NSArray*)customizationObjects
               withStyle:(MHTextObjectsCustomizationStyle)typeStyle{
     
-    
+    if (customization) {
         for (id object in customizationObjects) {
            
             
@@ -466,8 +494,19 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                              style:typeStyle];
             
             if ([object isKindOfClass:[UITextField class]]) {
+                NSLog(@"%@",[object subviews]);
+                NSLog(@"%@",[[object layer] sublayers]);
                 [object setBorderStyle:UITextBorderStyleNone];
-                [object setBackground:[self imageByRenderingView:txtView]];
+                if (![(UITextField*)object background]) {
+                    [object setBackground:[self imageByRenderingView:txtView]];
+                }else{
+                    CATransition *animation = [CATransition animation];
+                    animation.duration = customization.animationDuration;
+                    animation.type = kCATransitionFade;
+                    [[object layer] addAnimation:animation forKey:@"imageFade"];
+                    [object setBackground:[self imageByRenderingView:txtView]];
+                }
+
                 UIView *paddingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 20)];
                 [object setLeftView:paddingView];
                 [object setLeftViewMode:UITextFieldViewModeAlways];
@@ -475,6 +514,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                 [object setRightViewMode:UITextFieldViewModeAlways];
                 [object setBorderStyle:UITextBorderStyleNone];
             }else{
+                
                 for (id view in  [(UIScrollView*)self subviews]) {
                     if ([view isKindOfClass:[MHTextView class]]) {
                         if ([[view accessibilityIdentifier]isEqualToString:[object accessibilityIdentifier]]) {
@@ -482,6 +522,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                         }
                     }
                 }
+                
+                
                 [txtView setAccessibilityIdentifier:[object accessibilityIdentifier]];
                 [self addSubview:txtView];
                 [self bringSubviewToFront:object];
@@ -505,6 +547,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [object setFont:detail.labelFont];
             [object setTextColor:detail.labelColor];
         }
+    }
 }
 
 -(void)keyboardWillHide:(id)sender{
@@ -553,16 +596,16 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                              selector:@selector(keyboardWillHide:)
                                                  name:UITextViewTextDidEndEditingNotification
                                                object:nil];
+
     if (CustomizationBlock) {
         self.textObjectsCustomization = [self setDefaultCustomization];
         CustomizationBlock(self.textObjectsCustomization);
         [self setCustomization:self.textObjectsCustomization
                     forObjects:[self findObjectsofClass:self.textObjectsCustomization.classesToCustomize
                                                  onView:self
-                               showOnlyNonHiddenObjects:NO]
+                               showOnlyNonHiddenObjects:NO
+                                                 fields:nil]
                      withStyle:MHTextObjectsCustomizationStyleDefault];
-        
-
     }
 
     
@@ -570,9 +613,13 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     self.classObjects = typeOfClasses;
     [self findObjectsofClass:typeOfClasses
                       onView:self
-    showOnlyNonHiddenObjects:NO];
+    showOnlyNonHiddenObjects:NO
+                      fields:nil];
 }
+
+
 -(MHTextObjectsCustomization*)setDefaultCustomization{
+    
     
     MHCustomizationDetail *defaultCustomization =
     [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
@@ -608,7 +655,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
    return [[MHTextObjectsCustomization alloc]initWithClassesForCustomization:@[[UITextField class],[UITextView class]]
                                                   defaultCustomization:defaultCustomization
                                                  selectedCustomization:selectedCustomization
-                                                 nonValidCustomization:nonValidCustomization];
+                                                 nonValidCustomization:nonValidCustomization
+                                                           animationDuration:0.3];
 }
 
 - (UIView*)findFirstResponderOnView:(UIView*)view {
@@ -641,6 +689,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 -(UISegmentedControl *)prevNextSegment {
     UISegmentedControl*  prevNextSegment = [[UISegmentedControl alloc] initWithItems:@[ NSLocalizedString(@"Zurück", nil), NSLocalizedString(@"Weiter", nil) ]];
     prevNextSegment.momentary = YES;
+    [prevNextSegment setTintColor:[UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f]];
     prevNextSegment.segmentedControlStyle = UISegmentedControlStyleBar;
     
     [prevNextSegment addTarget:self
@@ -664,6 +713,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                               target:self
                                                                               action:@selector(dismissInputView)];
+    [doneItem setTintColor:[UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f]];
     
     [barItems addObject:doneItem];
     [toolbar setItems:barItems animated:NO];
@@ -684,7 +734,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     
     NSArray *fields = [self findObjectsofClass:self.classObjects
                                         onView:self
-                      showOnlyNonHiddenObjects:YES];
+                      showOnlyNonHiddenObjects:YES
+                                        fields:nil];
     
     
     NSMutableArray *curruptFields = [NSMutableArray new];
@@ -714,7 +765,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     if (curruptFields.count) {
         if (CurruptedObjectBlock) {
             CurruptedObjectBlock([NSArray arrayWithArray:curruptFields]);
-            if (self.shouldShakeNonValidateObjects) {
                 [self setCustomization:self.textObjectsCustomization
                             forObjects:curruptFields
                              withStyle:MHTextObjectsCustomizationStyleNonValidate];
@@ -733,6 +783,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     }
                 }
                 [textViews addObjectsFromArray:curruptFields];
+            if (self.shouldShakeNonValidateObjects) {
                 [self shakeObjects:[NSArray arrayWithArray:textViews]];
             }
         }
@@ -808,10 +859,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 -(NSArray*)findObjectsofClass:(NSArray*)classArray
                        onView:(UIView*)view
-     showOnlyNonHiddenObjects:(BOOL)nonHidden{
+     showOnlyNonHiddenObjects:(BOOL)nonHidden
+                       fields:(NSMutableArray*)fields{
     
-    
-    NSMutableArray *fields= [NSMutableArray new];
+    if (!fields) {
+        fields= [NSMutableArray new];
+    }
     for(id field in [view subviews]){
         for (id class in classArray) {
             if([field isKindOfClass:class]){
@@ -842,8 +895,9 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             if([field respondsToSelector:@selector(subviews)]){
                 [self findObjectsofClass:classArray
                                   onView:field
-                showOnlyNonHiddenObjects:nonHidden];
-                
+                showOnlyNonHiddenObjects:nonHidden
+                                  fields:fields];
+
             }
         }
     }
