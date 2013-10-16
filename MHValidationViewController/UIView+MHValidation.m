@@ -464,6 +464,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }else{
         if ([self isKindOfClass:[UIScrollView class]]) {
             CGRect keyborad = [[[not userInfo]objectForKey:@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
+           
             [self adjustContentOffsetWithKeyBoardHeight:keyborad.size.height];
             
             UIScrollView *sv = (UIScrollView*)self;
@@ -495,7 +496,9 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [scroll setContentOffset:CGPointMake(0,0) animated:YES];
         }
     }else{
-        [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5) animated:YES];
+        [UIView animateWithDuration:0.25 animations:^{
+             [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5) animated:NO];
+        }];
     }
 }
 
