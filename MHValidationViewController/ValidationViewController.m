@@ -60,6 +60,8 @@
                                                         ]
                            setCustomizationBlock:^(MHTextObjectsCustomization *customization) {
                         
+                               
+                               
                                /*****************************************************************************************
                                 You can Change the look of an TextView and Textfield 
                                 MHTextObjectsCustomization is changing the style of UITextFields and UITextViews by default.

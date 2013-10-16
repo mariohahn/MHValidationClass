@@ -677,6 +677,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                 labelColor:[UIColor blackColor]
                                           placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
+
+    
     
     MHCustomizationDetail *nonValidCustomization =
     [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
@@ -688,6 +690,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                 labelColor:[UIColor blackColor]
                                           placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
+
     MHCustomizationDetail *selectedCustomization =
     [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
                                      borderGradientColorUp:[UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f]
@@ -698,6 +701,27 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                 labelColor:[UIColor blackColor]
                                           placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
+    
+    if (OSVersion >=7) {
+        defaultCustomization.innerShadowColor = [UIColor clearColor];
+        defaultCustomization.borderGradientColorDow = [UIColor lightGrayColor];
+        defaultCustomization.borderGradientColorUp = [UIColor lightGrayColor];
+        defaultCustomization.cornerRadius = 3;
+        
+        
+        nonValidCustomization.innerShadowColor = [UIColor clearColor];
+        nonValidCustomization.borderGradientColorDow = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];;
+        nonValidCustomization.borderGradientColorUp = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];;
+        nonValidCustomization.cornerRadius = 3;
+        
+        
+        selectedCustomization.innerShadowColor = [UIColor clearColor];
+        selectedCustomization.borderGradientColorDow = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];;
+        selectedCustomization.borderGradientColorUp = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];;
+        selectedCustomization.cornerRadius = 3;
+    }
+    
+    
     
     
     
