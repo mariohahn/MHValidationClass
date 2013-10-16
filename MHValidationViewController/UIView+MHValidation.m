@@ -716,8 +716,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         
         
         selectedCustomization.innerShadowColor = [UIColor clearColor];
-        selectedCustomization.borderGradientColorDow = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];;
-        selectedCustomization.borderGradientColorUp = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];;
+        selectedCustomization.borderGradientColorDow = [UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f];
+        selectedCustomization.borderGradientColorUp = [UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f];
         selectedCustomization.cornerRadius = 3;
     }
     

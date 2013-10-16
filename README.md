@@ -1,6 +1,6 @@
 ios-MHValidation
 ================
-![alt tag](https://dl.dropboxusercontent.com/u/17911939/UIViewios6.png) ![alt tag](https://dl.dropboxusercontent.com/u/17911939/UIViewios7.png)
+![alt tag](https://dl.dropboxusercontent.com/u/17911939/UIViewios7.png)
 
 
 Setup
