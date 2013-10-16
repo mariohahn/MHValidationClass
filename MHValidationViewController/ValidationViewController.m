@@ -51,7 +51,7 @@
     /****************************************************************************************************************************
      Sets the ContentSize. You dont have to think about differnt Screen sizes 
      ****************************************************************************************************************************/
-    [self.scrollView MHAutoContentSizeForScrollView];
+    [self.scrollView MHAutoContentSizeForScrollViewWithPadding:10];
     
     [self.scrollView installMHValidationWithClasses:@[[UITextField class],
                                                       [UISwitch class],

@@ -37,6 +37,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 }
 
 
+
+
 -(void)drawRect:(CGRect)rect{
     
     
@@ -59,22 +61,22 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGContextRef context = UIGraphicsGetCurrentContext();
-
+    
     UIColor* gradientColorUp = customization.borderGradientColorUp;
     UIColor* gradientColorDown = customization.borderGradientColorDow;
     UIColor* backgroundColor = customization.backgroundColor;
     UIColor* shadow = customization.innerShadowColor;
     
     NSArray* gradientColorsForBorder = [NSArray arrayWithObjects:
-                                (id)gradientColorUp.CGColor,
-                                (id)gradientColorDown.CGColor, nil];
+                                        (id)gradientColorUp.CGColor,
+                                        (id)gradientColorDown.CGColor, nil];
     CGFloat gradientColorsForBorderLocations[] = {0, 1};
     CGGradientRef borderGradient = CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef)gradientColorsForBorder, gradientColorsForBorderLocations);
-
+    
     
     CGSize shadowOffset = CGSizeMake(0.1, 1.1);
     CGFloat shadowBlurRadius = 2.5;
-
+    
     
     UIBezierPath* borderGradientPath = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1, 1, rect.size.width-2, rect.size.height-2) cornerRadius: customization.cornerRadius];
     CGContextSaveGState(context);
@@ -82,7 +84,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     CGContextDrawLinearGradient(context, borderGradient, CGPointMake(((rect.size.width-2)/2)+1, 1), CGPointMake(((rect.size.width-2)/2)+1, 1+rect.size.height-2), 0);
     CGContextRestoreGState(context);
     
-        
+    
     UIBezierPath* rectangle2Path = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1+customization.borderWidth, 1+customization.borderWidth, rect.size.width-((1+customization.borderWidth)*2), rect.size.height-((1+customization.borderWidth)*2)) cornerRadius: customization.cornerRadius];
     [backgroundColor setFill];
     [rectangle2Path fill];
@@ -111,7 +113,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         [rectangle2NegativePath fill];
     }
     CGContextRestoreGState(context);
-
+    
     CGGradientRelease(borderGradient);
     CGColorSpaceRelease(colorSpace);
     
@@ -136,7 +138,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     self.selectedCustomization = selectedCustomization;
     self.nonValidCustomization = nonValidCustomization;
     return self;
-
+    
 }
 
 
@@ -153,6 +155,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                  cornerRadius:(float)cornerRadius
              innerShadowColor:(UIColor*)innerShadowColor
                    labelColor:(UIColor*)labelColor
+             placeHolderColor:(UIColor*)placeHolderColor
                     labelFont:(UIFont*)labelFont;
 {
     self = [super init];
@@ -166,6 +169,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     self.innerShadowColor = innerShadowColor;
     self.labelColor = labelColor;
     self.labelFont = labelFont;
+    self.placeHolderColor = placeHolderColor;
     return self;
 }
 
@@ -193,6 +197,13 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 @dynamic shouldShakeNonValidateObjects;
 @dynamic textObjectsCustomization;
 
+
+
+- (void)willMoveToWindow:(UIWindow *)newWindow {
+    if (newWindow == nil) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
+}
 
 
 //SHAKE OBEJCTS
@@ -234,8 +245,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 - (CGRect)determineFrameForObject:(id)obj {
     UIView *view = (UIView*)obj;
     while (![[view superview] isEqual:self]) {
-            view = [view superview];
-        }
+        view = [view superview];
+    }
     CGRect frame = [view convertRect:[view frame] toView:self];
     return frame;
 }
@@ -269,7 +280,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         
         CGRect obj1Frame = [self determineFrameForObject:obj1];
         CGRect obj2Frame = [self determineFrameForObject:obj2];
-
+        
         if (obj1Frame.origin.y > obj2Frame.origin.y) {
             return (NSComparisonResult)NSOrderedDescending;
         }
@@ -283,7 +294,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     [fieldsSort sortUsingComparator:comparatorBlock];
     
     CGRect frameSelectedObject = [self determineFrameForObject:selectedObject];
-
+    
     for (id viewsAndFields in fieldsSort) {
         
         CGRect frameViewOrField = [self determineFrameForObject:viewsAndFields];
@@ -375,15 +386,22 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
 }
 -(void)dismissInputView{
+    [self calculateContentInset];
     if ([self isKindOfClass:[UIScrollView class]]) {
         UIScrollView *sv = (UIScrollView*)self;
         [UIView animateWithDuration:0.3 animations:^{
-            [sv setContentInset:UIEdgeInsetsMake(0, 0, 0, 0)];
-            [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
-
+            if (OSVersion >=7) {
+                [sv setContentInset:UIEdgeInsetsMake([self calculateContentInset], 0, 0, 0)];
+                [sv setScrollIndicatorInsets:UIEdgeInsetsMake([self calculateContentInset], 0, 0, 0)];
+            }else{
+                [sv setContentInset:UIEdgeInsetsMake(0, 0, 0, 0)];
+                [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
+            }
+            
+            
         }];
-        }
-
+    }
+    
     [self setCustomization:self.textObjectsCustomization
                 forObjects:@[[self findFirstResponderOnView:self]]
                  withStyle:MHTextObjectsCustomizationStyleDefault];
@@ -392,8 +410,25 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 }
 
 
--(void)keyboardWillShow:(NSNotification*)not{
+-(UIViewController*)findViewController{
+    id currentView =self;
+    while (![currentView isKindOfClass:[UIViewController class]]){
+        currentView = [currentView nextResponder];
+    }
+    return (UIViewController*)currentView;
+}
 
+-(CGFloat)calculateContentInset{
+    UIViewController *vc =[self findViewController];
+    if (vc.navigationController) {
+        return 20 +vc.navigationController.navigationBar.frame.size.height;
+    }
+    return 0;
+}
+
+
+-(void)keyboardWillShow:(NSNotification*)not{
+    
     
     if (![not userInfo]) {
         
@@ -404,7 +439,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             id firstResponder = [self findFirstResponderOnView:self];
             if (![firstResponder inputAccessoryView]) {
                 [firstResponder becomeFirstResponder];
-
+                
                 UIToolbar *toolBar = [self toolbarInit];
                 [toolBar sizeToFit];
                 [firstResponder setInputAccessoryView:toolBar];
@@ -432,9 +467,15 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [self adjustContentOffsetWithKeyBoardHeight:keyborad.size.height];
             
             UIScrollView *sv = (UIScrollView*)self;
-            [self MHAutoContentSizeForScrollView];
-            [sv setContentInset:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
-            [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
+            [self MHAutoContentSizeForScrollViewWithPadding:10];
+            if (OSVersion >=7) {
+                [sv setContentInset:UIEdgeInsetsMake([self calculateContentInset], 0, keyborad.size.height, 0)];
+                [sv setScrollIndicatorInsets:UIEdgeInsetsMake([self calculateContentInset], 0, keyborad.size.height, 0)];
+            }else{
+                [sv setContentInset:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
+                [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
+                
+            }
         }
     }
 }
@@ -447,13 +488,15 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     
     id firstResponder = [self findFirstResponderOnView:self];
     
-        if ((([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5)<0) {
-            [scroll setContentOffset:CGPointMake(0,0) animated:YES];
-
+    if ((([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5)<0) {
+        if (OSVersion >=7) {
+            [scroll setContentOffset:CGPointMake(0,-[self calculateContentInset]) animated:YES];
         }else{
-        
-            [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.frame.size.height+keyBoardHeight+5) animated:YES];
-        }    
+            [scroll setContentOffset:CGPointMake(0,0) animated:YES];
+        }
+    }else{
+        [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5) animated:YES];
+    }
 }
 
 - (UIImage *)imageByRenderingView:(id)view{
@@ -479,16 +522,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 
 
-
-
 -(void)setCustomization:(MHTextObjectsCustomization*)customization
              forObjects:(NSArray*)customizationObjects
               withStyle:(MHTextObjectsCustomizationStyle)typeStyle{
     
     if (customization) {
         for (id object in customizationObjects) {
-           
-            
             MHTextView *txtView = [[MHTextView alloc]initWithFrame:[object frame]
                                                      customization:customization
                                                              style:typeStyle];
@@ -504,7 +543,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     [[object layer] addAnimation:animation forKey:@"imageFade"];
                     [object setBackground:[self imageByRenderingView:txtView]];
                 }
-
+                
                 UIView *paddingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 20)];
                 [object setLeftView:paddingView];
                 [object setLeftViewMode:UITextFieldViewModeAlways];
@@ -544,6 +583,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             }
             [object setFont:detail.labelFont];
             [object setTextColor:detail.labelColor];
+            if([object respondsToSelector:@selector(placeholder)]){
+                if ([object placeholder].length) {
+                    [object setAttributedPlaceholder:[[NSAttributedString alloc] initWithString:[object placeholder] attributes:@{NSForegroundColorAttributeName: detail.placeHolderColor}]];
+                }
+            }
+            
         }
     }
 }
@@ -554,7 +599,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [self setCustomization:self.textObjectsCustomization
                         forObjects:@[[sender object]]
                          withStyle:MHTextObjectsCustomizationStyleDefault];
-
+            
         }
     }
 }
@@ -588,13 +633,13 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                              selector:@selector(keyboardWillHide:)
                                                  name:UIKeyboardDidHideNotification
                                                object:nil];
-
+    
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWillHide:)
                                                  name:UITextViewTextDidEndEditingNotification
                                                object:nil];
-
+    
     if (CustomizationBlock) {
         self.textObjectsCustomization = [self setDefaultCustomization];
         CustomizationBlock(self.textObjectsCustomization);
@@ -605,7 +650,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                  fields:nil]
                      withStyle:MHTextObjectsCustomizationStyleDefault];
     }
-
+    
     
     
     self.classObjects = typeOfClasses;
@@ -627,6 +672,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                               cornerRadius:8
                                           innerShadowColor:[UIColor grayColor]
                                                 labelColor:[UIColor blackColor]
+                                          placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
     
     MHCustomizationDetail *nonValidCustomization =
@@ -637,6 +683,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                               cornerRadius:8
                                           innerShadowColor:[UIColor redColor]
                                                 labelColor:[UIColor blackColor]
+                                          placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
     MHCustomizationDetail *selectedCustomization =
     [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
@@ -646,15 +693,16 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                               cornerRadius:8
                                           innerShadowColor:[UIColor colorWithRed:0.61f green:1.00f blue:0.53f alpha:1.00f]
                                                 labelColor:[UIColor blackColor]
+                                          placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
     
     
     
-   return [[MHTextObjectsCustomization alloc]initWithClassesForCustomization:@[[UITextField class],[UITextView class]]
-                                                  defaultCustomization:defaultCustomization
-                                                 selectedCustomization:selectedCustomization
-                                                 nonValidCustomization:nonValidCustomization
-                                                           animationDuration:0.3];
+    return [[MHTextObjectsCustomization alloc]initWithClassesForCustomization:@[[UITextField class],[UITextView class]]
+                                                         defaultCustomization:defaultCustomization
+                                                        selectedCustomization:selectedCustomization
+                                                        nonValidCustomization:nonValidCustomization
+                                                            animationDuration:0.3];
 }
 
 - (UIView*)findFirstResponderOnView:(UIView*)view {
@@ -689,7 +737,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     prevNextSegment.momentary = YES;
     [prevNextSegment setTintColor:[UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f]];
     prevNextSegment.segmentedControlStyle = UISegmentedControlStyleBar;
-    
+    [prevNextSegment setTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}
+                                   forState:UIControlStateDisabled];
     [prevNextSegment addTarget:self
                         action:@selector(prevOrNext:)
               forControlEvents:UIControlEventValueChanged];
@@ -763,24 +812,26 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     if (curruptFields.count) {
         if (CurruptedObjectBlock) {
             CurruptedObjectBlock([NSArray arrayWithArray:curruptFields]);
-                [self setCustomization:self.textObjectsCustomization
-                            forObjects:curruptFields
-                             withStyle:MHTextObjectsCustomizationStyleNonValidate];
-                
-                NSMutableArray *accessIdent = [NSMutableArray new];
-                for (id views in curruptFields) {
+            [self setCustomization:self.textObjectsCustomization
+                        forObjects:curruptFields
+                         withStyle:MHTextObjectsCustomizationStyleNonValidate];
+            
+            NSMutableArray *accessIdent = [NSMutableArray new];
+            for (id views in curruptFields) {
+                if ([views accessibilityIdentifier]) {
                     [accessIdent addObject:[views accessibilityIdentifier]];
                 }
-                
-                NSMutableArray *textViews = [NSMutableArray new];
-                for (id views in [(UIScrollView*)self subviews]) {
-                    if ([views isKindOfClass:[MHTextView class]]) {
-                        if ([accessIdent containsObject:[views accessibilityIdentifier]]) {
-                            [textViews addObject:views];
-                        }
+            }
+            
+            NSMutableArray *textViews = [NSMutableArray new];
+            for (id views in [(UIScrollView*)self subviews]) {
+                if ([views isKindOfClass:[MHTextView class]]) {
+                    if ([accessIdent containsObject:[views accessibilityIdentifier]]) {
+                        [textViews addObject:views];
                     }
                 }
-                [textViews addObjectsFromArray:curruptFields];
+            }
+            [textViews addObjectsFromArray:curruptFields];
             if (self.shouldShakeNonValidateObjects) {
                 [self shakeObjects:[NSArray arrayWithArray:textViews]];
             }
@@ -807,7 +858,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     [dictMail setObject:objectString forKey:[object accessibilityIdentifier]];
                     stringForMail = [stringForMail stringByAppendingString:[NSString stringWithFormat:@"<br /><br />%@:         %@",[object accessibilityIdentifier],objectString ]];
                 }
-               
+                
             }
             bool isFirstRegistration =NO;
             if ([[NSUserDefaults standardUserDefaults]objectForKey:@"MHValidationStorage"]) {
@@ -827,7 +878,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }
 }
 
--(void)MHAutoContentSizeForScrollView{
+-(void)MHAutoContentSizeForScrollViewWithPadding:(CGFloat)padding{
     
     if ([self isKindOfClass:[UIScrollView class]]) {
         CGRect rect = CGRectZero;
@@ -835,7 +886,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             rect = CGRectUnion(rect, view.frame);
         }
         
-        [(UIScrollView*)self setContentSize:CGSizeMake(rect.size.width, rect.size.height)];
+        [(UIScrollView*)self setContentSize:CGSizeMake(rect.size.width, rect.size.height+padding)];
     }else{
         NSLog(@"You can only set the ContentSize for ScrollViews");
     }
@@ -883,7 +934,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     }
                 }
                 if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
-                    if (![field inputAccessoryView]) {                        
+                    if (![field inputAccessoryView]) {
                         UIToolbar *toolBar = [self toolbarInit];
                         [toolBar sizeToFit];
                         [field setInputAccessoryView:toolBar];
@@ -895,7 +946,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                   onView:field
                 showOnlyNonHiddenObjects:nonHidden
                                   fields:fields];
-
+                
             }
         }
     }
@@ -906,7 +957,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     
     for (id object in objects){
         CALayer *layer = [object layer];
-
+        
         CGPoint pos = layer.position;
         static int numberOfShakes = 4;
         CAKeyframeAnimation *shakeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];

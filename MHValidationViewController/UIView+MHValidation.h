@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#define OSVersion [[[UIDevice currentDevice] systemVersion] floatValue]
 
 
 static NSString * const MHValidationRegexEmail = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
@@ -48,6 +49,7 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 
 @property (nonatomic,strong) UIFont *labelFont;
 @property (nonatomic,strong) UIColor *labelColor;
+@property (nonatomic,strong) UIColor *placeHolderColor;
 
 - (id)initWithBackgroundColor:(UIColor*)backgroundColor
         borderGradientColorUp:(UIColor*)borderGradientColorUp
@@ -56,8 +58,8 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
                  cornerRadius:(float)cornerRadius
              innerShadowColor:(UIColor*)innerShadowColor
                    labelColor:(UIColor*)labelColor
+             placeHolderColor:(UIColor*)placeHolderColor
                     labelFont:(UIFont*)labelFont;
-
 @end
 
 
@@ -108,22 +110,22 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 
 @interface UIView (MHValidation)<UITextFieldDelegate,UITextViewDelegate>
 
-/**************************************************************************************************************************** 
+/****************************************************************************************************************************
  List of available Classes + description:
  
-    Standard:
-            
-        UITextView:         checks if the textlenght is > 0
-        UITextField:        checks if the textlenght is > 0
-        UISegmentedControl: returns the name of the selected index
-        UISwicth:           returns ON or OFF
+ Standard:
  
-    MHValidationItem:
-        
-        UITextView:         checks if the textlenght is > 0 and REGEX
-        UITextField:        checks if the textlenght is > 0 and REGEX
-        UISegmentedControl: Standard 
-        UISwicth:           Standard
+ UITextView:         checks if the textlenght is > 0
+ UITextField:        checks if the textlenght is > 0
+ UISegmentedControl: returns the name of the selected index
+ UISwicth:           returns ON or OFF
+ 
+ MHValidationItem:
+ 
+ UITextView:         checks if the textlenght is > 0 and REGEX
+ UITextField:        checks if the textlenght is > 0 and REGEX
+ UISegmentedControl: Standard
+ UISwicth:           Standard
  ****************************************************************************************************************************/
 @property (nonatomic, copy) NSArray *classObjects;
 /****************************************************************************************************************************
@@ -155,18 +157,18 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
  Start Validation
  nonMandatoryFields- Can only be TextViews and TextField
  regexObject - Objects with special validation can only be TextViews and Textfields
- onSwitches - Switches which must be on 
+ onSwitches - Switches which must be on
  curruptObjectBlock - return all curruptItems
  successBlock- can't find curruptItems
  
-                emailString structure:      <br /><br />accessibilityIdentifier:         outcome
-                valueKeyDict structure:     "accessibilityIdentifier" = outcome;
-                object structure:           @[object,object,object]
-
+ emailString structure:      <br /><br />accessibilityIdentifier:         outcome
+ valueKeyDict structure:     "accessibilityIdentifier" = outcome;
+ object structure:           @[object,object,object]
+ 
  outcome:
-    UITextField & UITextView :          text
-    UISegmentedControl :                title of selected Objects
-    UISwitch :                          ON / OFF
+ UITextField & UITextView :          text
+ UISegmentedControl :                title of selected Objects
+ UISwitch :                          ON / OFF
  ****************************************************************************************************************************/
 
 -(void)validateWithNONMandatoryTextObjects:(NSArray*)nonMandatoryFields
@@ -183,10 +185,10 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 /****************************************************************************************************************************
  Sets the ContentSize. You dont have to think about differnt Screen sizes
  ****************************************************************************************************************************/
--(void)MHAutoContentSizeForScrollView;
+-(void)MHAutoContentSizeForScrollViewWithPadding:(CGFloat)padding;
 
 /****************************************************************************************************************************
-Shake all objects from the objects Array
+ Shake all objects from the objects Array
  ****************************************************************************************************************************/
 - (void)shakeObjects:(NSArray*)objects;
 
@@ -196,7 +198,7 @@ Shake all objects from the objects Array
                        fields:(NSMutableArray*)fields;
 
 /****************************************************************************************************************************
-**************************************************    REQUIRED Methode     ************************************************** 
+ **************************************************    REQUIRED Methode     **************************************************
  Install MHValidation
  typeOfClasses look at classObjects
  ****************************************************************************************************************************/
