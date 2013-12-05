@@ -40,6 +40,8 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 @property (nonatomic) float cornerRadius;
 @property (nonatomic) float borderWidth;
 
+@property (nonatomic,strong) UIImage *ownBackgroundImage;
+
 @property (nonatomic,strong) UIColor *backgroundColor;
 
 @property (nonatomic,strong) UIColor *borderGradientColorUp;
@@ -108,8 +110,7 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 
 
 
-@interface UIView (MHValidation)<UITextFieldDelegate,UITextViewDelegate>
-
+@interface UIView (MHValidation)<UITextFieldDelegate,UITextViewDelegate,UIScrollViewDelegate>
 /****************************************************************************************************************************
  List of available Classes + description:
  
@@ -139,7 +140,12 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
  AutoShake animation for NonValidateObjects
  ****************************************************************************************************************************/
 @property (nonatomic) BOOL shouldShakeNonValidateObjects;
-
+/****************************************************************************************************************************
+ Enable Next Object Selection With Enter
+ 
+ DEFAULT Is NO
+ ****************************************************************************************************************************/
+@property (nonatomic) BOOL shouldEnableNextObjectSelectionWithEnter;
 
 
 @property (nonatomic,copy) MHTextObjectsCustomization *textObjectsCustomization;

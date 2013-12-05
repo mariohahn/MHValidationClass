@@ -18,6 +18,7 @@ NSString * const SHAKE_OBJECTS_IDENTIFIER = @"SHAKE_OBJECTS_IDENTIFIER";
 NSString * const CLASS_OBJECTS_IDENTIFIER = @"CLASS_OBJECTS_IDENTIFIER";
 NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
 NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
+NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOBJECTSELECTIONWITHENTER";
 
 
 
@@ -170,6 +171,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     self.labelColor = labelColor;
     self.labelFont = labelFont;
     self.placeHolderColor = placeHolderColor;
+    self.ownBackgroundImage = nil;
     return self;
 }
 
@@ -196,15 +198,20 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 @dynamic showNextAndPrevSegmentedControl;
 @dynamic shouldShakeNonValidateObjects;
 @dynamic textObjectsCustomization;
-
-
+@dynamic shouldEnableNextObjectSelectionWithEnter;
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
     if (newWindow == nil) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
 }
-
+//SHAKE OBEJCTS
+-(void)setShouldEnableNextObjectSelectionWithEnter:(BOOL)shouldEnableNextObjectSelectionWithEnter{
+    objc_setAssociatedObject(self, &SHOULDENABLENEXTOBJECTSELECTIONWITHENTER, [NSNumber numberWithBool:shouldEnableNextObjectSelectionWithEnter], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+-(BOOL)shouldEnableNextObjectSelectionWithEnter{
+    return [objc_getAssociatedObject(self, &SHOULDENABLENEXTOBJECTSELECTIONWITHENTER) boolValue];
+}
 
 //SHAKE OBEJCTS
 -(void)setShouldShakeNonValidateObjects:(BOOL)shouldShakeNonValidateObjects{
@@ -240,6 +247,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 -(NSArray*)classObjects{
     return objc_getAssociatedObject(self, &CLASS_OBJECTS_IDENTIFIER);
 }
+
 
 
 - (CGRect)determineFrameForObject:(id)obj {
@@ -430,7 +438,10 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 -(void)keyboardWillShow:(NSNotification*)not{
     
     
+    
     if (![not userInfo]) {
+        
+        
         
         if (self.showNextAndPrevSegmentedControl) {
             [self setCustomization:self.textObjectsCustomization
@@ -464,7 +475,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     }else{
         if ([self isKindOfClass:[UIScrollView class]]) {
             CGRect keyborad = [[[not userInfo]objectForKey:@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
-           
+            
             [self adjustContentOffsetWithKeyBoardHeight:keyborad.size.height];
             
             UIScrollView *sv = (UIScrollView*)self;
@@ -485,10 +496,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 
 
 -(void)adjustContentOffsetWithKeyBoardHeight:(float)keyBoardHeight{
-    UIScrollView *scroll = (UIScrollView*)self;
-    
     id firstResponder = [self findFirstResponderOnView:self];
+    [self setContentOffsetForFirstresponder:firstResponder andKeyBoardHeight:keyBoardHeight];
     
+}
+-(void)setContentOffsetForFirstresponder:(id)firstResponder andKeyBoardHeight:(float)keyBoardHeight{
+    UIScrollView *scroll = (UIScrollView*)self;
     if ((([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5)<0) {
         if (OSVersion >=7) {
             [scroll setContentOffset:CGPointMake(0,-[self calculateContentInset]) animated:YES];
@@ -496,11 +509,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             [scroll setContentOffset:CGPointMake(0,0) animated:YES];
         }
     }else{
-        [UIView animateWithDuration:0.25 animations:^{
-             [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5) animated:NO];
+        [UIView animateWithDuration:0.35 animations:^{
+            [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5) animated:NO];
         }];
     }
 }
+
 
 - (UIImage *)imageByRenderingView:(id)view{
     CGFloat scale = 1.0;
@@ -534,6 +548,24 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             MHTextView *txtView = [[MHTextView alloc]initWithFrame:[object frame]
                                                      customization:customization
                                                              style:typeStyle];
+            UIImage *ownImage = nil;
+            switch (typeStyle) {
+                case MHTextObjectsCustomizationStyleDefault:{
+                    ownImage =  customization.defaultCustomization.ownBackgroundImage;
+                }
+                    break;
+                case MHTextObjectsCustomizationStyleSelected:{
+                    ownImage =  customization.selectedCustomization.ownBackgroundImage;
+                }
+                    break;
+                case MHTextObjectsCustomizationStyleNonValidate:{
+                    ownImage =  customization.nonValidCustomization.ownBackgroundImage;
+                }
+                    break;
+                default:
+                    break;
+            }
+            
             
             if ([object isKindOfClass:[UITextField class]]) {
                 [object setBorderStyle:UITextBorderStyleNone];
@@ -545,6 +577,10 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     animation.type = kCATransitionFade;
                     [[object layer] addAnimation:animation forKey:@"imageFade"];
                     [object setBackground:[self imageByRenderingView:txtView]];
+                }
+                if (ownImage) {
+                    [object setBackground:ownImage];
+                    
                 }
                 
                 UIView *paddingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 20)];
@@ -563,9 +599,17 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     }
                 }
                 
-                
+                [txtView setAutoresizingMask:[object autoresizingMask]];
                 [txtView setAccessibilityIdentifier:[object accessibilityIdentifier]];
-                [self addSubview:txtView];
+                if (ownImage) {
+                    UIImageView *iv = [[UIImageView alloc]initWithImage:ownImage];
+                    [iv setAutoresizingMask:[object autoresizingMask]];
+                    [iv setAccessibilityIdentifier:[object accessibilityIdentifier]];
+                    iv.frame = CGRectMake(txtView.frame.origin.x, txtView.frame.origin.y - ownImage.size.height +txtView.frame.size.height, txtView.frame.size.width, ownImage.size.height);
+                    [self addSubview:iv];
+                }else{
+                    [self addSubview:txtView];
+                }
                 [self bringSubviewToFront:object];
                 [object setBackgroundColor:[UIColor clearColor]];
             }
@@ -643,6 +687,8 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                  name:UITextViewTextDidEndEditingNotification
                                                object:nil];
     
+    self.shouldEnableNextObjectSelectionWithEnter =NO;
+    
     if (CustomizationBlock) {
         self.textObjectsCustomization = [self setDefaultCustomization];
         CustomizationBlock(self.textObjectsCustomization);
@@ -653,8 +699,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                  fields:nil]
                      withStyle:MHTextObjectsCustomizationStyleDefault];
     }
-    
-    
     
     self.classObjects = typeOfClasses;
     [self findObjectsofClass:typeOfClasses
@@ -677,7 +721,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                 labelColor:[UIColor blackColor]
                                           placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
-
+    
     
     
     MHCustomizationDetail *nonValidCustomization =
@@ -690,7 +734,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                                                 labelColor:[UIColor blackColor]
                                           placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
-
+    
     MHCustomizationDetail *selectedCustomization =
     [[MHCustomizationDetail alloc] initWithBackgroundColor:[UIColor whiteColor]
                                      borderGradientColorUp:[UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f]
@@ -741,6 +785,7 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     return nil;
 }
 
+
 -(void)prevOrNext:(UISegmentedControl*)segm{
     
     MHSelectionType type = MHSelectionTypePrev;
@@ -763,7 +808,9 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
     UISegmentedControl*  prevNextSegment = [[UISegmentedControl alloc] initWithItems:@[ NSLocalizedString(@"Zurück", nil), NSLocalizedString(@"Weiter", nil) ]];
     prevNextSegment.momentary = YES;
     [prevNextSegment setTintColor:[UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f]];
-    prevNextSegment.segmentedControlStyle = UISegmentedControlStyleBar;
+    if ([prevNextSegment respondsToSelector:@selector(segmentedControlStyle)]) {
+        prevNextSegment.segmentedControlStyle = UISegmentedControlStyleBar;
+    }
     [prevNextSegment setTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor whiteColor]}
                                    forState:UIControlStateDisabled];
     [prevNextSegment addTarget:self
@@ -862,6 +909,14 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
             if (self.shouldShakeNonValidateObjects) {
                 [self shakeObjects:[NSArray arrayWithArray:textViews]];
             }
+            if ([self isKindOfClass:[UIScrollView class]]) {
+                UIScrollView *sv = (UIScrollView*)self;
+                if (sv.contentInset.bottom != 0) {
+                    [self setContentOffsetForFirstresponder:textViews[0] andKeyBoardHeight:sv.contentInset.bottom-10];
+                }else{
+                    [self setContentOffsetForFirstresponder:textViews[0] andKeyBoardHeight:sv.contentInset.bottom];
+                }
+            }
         }
     }else{
         if (SuccessBlock) {
@@ -906,7 +961,6 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
 }
 
 -(void)MHAutoContentSizeForScrollViewWithPadding:(CGFloat)padding{
-    
     if ([self isKindOfClass:[UIScrollView class]]) {
         CGRect rect = CGRectZero;
         for(UIView * view in [(UIScrollView*)self subviews]){
@@ -961,6 +1015,12 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
                     }
                 }
                 if ([field isKindOfClass:[UITextField class]] || [field isKindOfClass:[UITextView class]]) {
+                    if ([field isKindOfClass:[UITextField class]]) {
+                        [(UITextField*)field setDelegate:self];
+                    }
+                    if ([field isKindOfClass:[UITextView class]]) {
+                        [(UITextView*)field setDelegate:self];
+                    }
                     if (![field inputAccessoryView]) {
                         UIToolbar *toolBar = [self toolbarInit];
                         [toolBar sizeToFit];
@@ -978,6 +1038,20 @@ NSString * const CUSTOMIZATION_IDENTIFIER = @"CUSTOMIZATION_IDENTIFIER";
         }
     }
     return fields;
+}
+
+
+-(BOOL)textFieldShouldReturn:(UITextField *)textField{
+    if (self.shouldEnableNextObjectSelectionWithEnter) {
+        [self searchForObjectsOfClass:self.classObjects
+               selectNextOrPrevObject:MHSelectionTypeNext
+                     foundObjectBlock:^(id object,
+                                        MHSelectedObjectType objectType
+                                        ) {
+                         [object becomeFirstResponder];
+                     }];
+    }
+    return NO;
 }
 
 - (void)shakeObjects:(NSArray*)objects{
