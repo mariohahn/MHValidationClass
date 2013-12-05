@@ -259,6 +259,24 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     return frame;
 }
 
+-(NSMutableArray*)sortObjectsWithFrame:(NSArray*)objects{
+    NSComparator comparatorBlock = ^(id obj1, id obj2) {
+        
+        CGRect obj1Frame = [self determineFrameForObject:obj1];
+        CGRect obj2Frame = [self determineFrameForObject:obj2];
+        
+        if (obj1Frame.origin.y > obj2Frame.origin.y) {
+            return (NSComparisonResult)NSOrderedDescending;
+        }
+        if (obj1Frame.origin.y < obj2Frame.origin.y) {
+            return (NSComparisonResult)NSOrderedAscending;
+        }
+        return (NSComparisonResult)NSOrderedSame;
+    };
+    NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:objects];
+    [fieldsSort sortUsingComparator:comparatorBlock];
+    return fieldsSort;
+}
 
 -(void)searchForObjectsOfClass:(NSArray*)classes
         selectNextOrPrevObject:(MHSelectionType)selectionType
@@ -283,23 +301,8 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     }else{
         [self hideSegment:NO];
     }
-    
-    NSComparator comparatorBlock = ^(id obj1, id obj2) {
-        
-        CGRect obj1Frame = [self determineFrameForObject:obj1];
-        CGRect obj2Frame = [self determineFrameForObject:obj2];
-        
-        if (obj1Frame.origin.y > obj2Frame.origin.y) {
-            return (NSComparisonResult)NSOrderedDescending;
-        }
-        if (obj1Frame.origin.y < obj2Frame.origin.y) {
-            return (NSComparisonResult)NSOrderedAscending;
-        }
-        return (NSComparisonResult)NSOrderedSame;
-    };
     id objectWhichShouldBecomeFirstResponder= nil;
-    NSMutableArray *fieldsSort = [[NSMutableArray alloc]initWithArray:allObjectsWhichAreKindOfClasses];
-    [fieldsSort sortUsingComparator:comparatorBlock];
+    NSMutableArray *fieldsSort = [self sortObjectsWithFrame:allObjectsWhichAreKindOfClasses];
     
     CGRect frameSelectedObject = [self determineFrameForObject:selectedObject];
     
@@ -686,7 +689,6 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                                                object:nil];
     
     self.shouldEnableNextObjectSelectionWithEnter =NO;
-    
     if (CustomizationBlock) {
         self.textObjectsCustomization = [self setDefaultCustomization];
         CustomizationBlock(self.textObjectsCustomization);
@@ -699,10 +701,20 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     }
     
     self.classObjects = typeOfClasses;
-    [self findObjectsofClass:typeOfClasses
-                      onView:self
-    showOnlyNonHiddenObjects:NO
-                      fields:nil];
+    NSArray *allObjects  = [self findObjectsofClass:typeOfClasses
+                                             onView:self
+                           showOnlyNonHiddenObjects:NO
+                                             fields:nil];
+    
+    
+    NSDictionary *dict  =[[NSUserDefaults standardUserDefaults]objectForKey:[NSString stringWithFormat:@"MHValidationStorage%@",NSStringFromClass([[self findViewController] class])]];
+    if (dict) {
+        for (id object in allObjects) {
+            if ([object isKindOfClass:[UITextField class]] || [object isKindOfClass:[UITextView class]]) {
+                [object setText:dict[[object accessibilityIdentifier]]];
+            }
+        }
+    }
 }
 
 
@@ -851,10 +863,12 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                                             )SuccessBlock{
     
     
-    NSArray *fields = [self findObjectsofClass:self.classObjects
-                                        onView:self
-                      showOnlyNonHiddenObjects:YES
-                                        fields:nil];
+    NSArray *fieldsunsorted = [self findObjectsofClass:self.classObjects
+                                                onView:self
+                              showOnlyNonHiddenObjects:YES
+                                                fields:nil];
+    
+    NSMutableArray *fields = [self sortObjectsWithFrame:fieldsunsorted];
     
     
     NSMutableArray *curruptFields = [NSMutableArray new];
@@ -940,7 +954,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                 }
                 
             }
-            bool isFirstRegistration =NO;
+            BOOL isFirstRegistration =NO;
             if ([[NSUserDefaults standardUserDefaults]objectForKey:@"MHValidationStorage"]) {
                 [dictMail setObject:@"update" forKey:@"status"];
                 stringForMail = [stringForMail stringByAppendingString:[NSString stringWithFormat:@"<br /><br />%@:         %@",@"status",@"update" ]];
@@ -950,8 +964,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                 stringForMail = [stringForMail stringByAppendingString:[NSString stringWithFormat:@"<br /><br />%@:         %@",@"status",@"new" ]];
                 isFirstRegistration =YES;
             }
-            
-            [[NSUserDefaults standardUserDefaults]setObject:dictMail forKey:@"MHValidationStorage"];
+            [[NSUserDefaults standardUserDefaults]setObject:dictMail forKey:[NSString stringWithFormat:@"MHValidationStorage%@",NSStringFromClass([[self findViewController] class])] ];
             [[NSUserDefaults standardUserDefaults ]synchronize];
             SuccessBlock(stringForMail,dictMail,fields,isFirstRegistration);
         }
