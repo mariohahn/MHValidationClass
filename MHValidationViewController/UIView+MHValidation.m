@@ -475,9 +475,6 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     }else{
         if ([self isKindOfClass:[UIScrollView class]]) {
             CGRect keyborad = [[[not userInfo]objectForKey:@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
-            
-            [self adjustContentOffsetWithKeyBoardHeight:keyborad.size.height];
-            
             UIScrollView *sv = (UIScrollView*)self;
             [self MHAutoContentSizeForScrollViewWithPadding:10];
             if (OSVersion >=7) {
@@ -488,6 +485,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                 [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
                 
             }
+            [self adjustContentOffsetWithKeyBoardHeight:keyborad.size.height];
         }
     }
 }
