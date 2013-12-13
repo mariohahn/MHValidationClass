@@ -935,11 +935,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
             }
             if ([self isKindOfClass:[UIScrollView class]]) {
                 UIScrollView *sv = (UIScrollView*)self;
-                if (sv.contentInset.bottom != 0) {
-                    [self setContentOffsetForFirstresponder:textViews[0] andKeyBoardHeight:sv.contentInset.bottom-10];
-                }else{
-                    [self setContentOffsetForFirstresponder:textViews[0] andKeyBoardHeight:sv.contentInset.bottom];
-                }
+                [sv scrollRectToVisible:[textViews[0] frame] animated:YES];
             }
         }
     }else{
