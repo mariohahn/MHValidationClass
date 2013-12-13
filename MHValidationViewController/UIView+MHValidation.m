@@ -89,6 +89,12 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     UIBezierPath* rectangle2Path = [UIBezierPath bezierPathWithRoundedRect: CGRectMake(1+customization.borderWidth, 1+customization.borderWidth, rect.size.width-((1+customization.borderWidth)*2), rect.size.height-((1+customization.borderWidth)*2)) cornerRadius: customization.cornerRadius];
     [backgroundColor setFill];
     [rectangle2Path fill];
+    if (![customization.borderColor isEqual:[UIColor clearColor]]) {
+        [customization.borderColor setStroke];
+        rectangle2Path.lineWidth = customization.borderWidth;
+        [rectangle2Path stroke];
+    }
+    
     
     CGRect rectangle2BorderRect = CGRectInset([rectangle2Path bounds], -shadowBlurRadius, -shadowBlurRadius);
     rectangle2BorderRect = CGRectOffset(rectangle2BorderRect, -shadowOffset.width, -shadowOffset.height);
@@ -172,6 +178,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     self.labelFont = labelFont;
     self.placeHolderColor = placeHolderColor;
     self.ownBackgroundImage = nil;
+    self.borderColor = nil;
     return self;
 }
 
@@ -581,7 +588,6 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                 }
                 if (ownImage) {
                     [object setBackground:ownImage];
-                    
                 }
                 
                 UIView *paddingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 20)];
@@ -629,6 +635,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                 default:
                     break;
             }
+
             [object setFont:detail.labelFont];
             [object setTextColor:detail.labelColor];
             if([object respondsToSelector:@selector(placeholder)]){
@@ -758,21 +765,26 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     
     if (OSVersion >=7) {
         defaultCustomization.innerShadowColor = [UIColor clearColor];
-        defaultCustomization.borderGradientColorDow = [UIColor lightGrayColor];
-        defaultCustomization.borderGradientColorUp = [UIColor lightGrayColor];
+        defaultCustomization.borderGradientColorDow = [UIColor clearColor];
+        defaultCustomization.borderGradientColorUp = [UIColor clearColor];
         defaultCustomization.cornerRadius = 3;
-        
+        defaultCustomization.borderColor = [UIColor lightGrayColor];
+
         
         nonValidCustomization.innerShadowColor = [UIColor clearColor];
-        nonValidCustomization.borderGradientColorDow = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];;
-        nonValidCustomization.borderGradientColorUp = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];;
+        nonValidCustomization.borderGradientColorDow = [UIColor clearColor];
+        nonValidCustomization.borderGradientColorUp = [UIColor clearColor];
         nonValidCustomization.cornerRadius = 3;
+        nonValidCustomization.borderColor = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];
+
         
         
         selectedCustomization.innerShadowColor = [UIColor clearColor];
-        selectedCustomization.borderGradientColorDow = [UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f];
-        selectedCustomization.borderGradientColorUp = [UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f];
+        selectedCustomization.borderGradientColorDow = [UIColor clearColor];
+        selectedCustomization.borderGradientColorUp = [UIColor clearColor];
         selectedCustomization.cornerRadius = 3;
+        selectedCustomization.borderColor = [UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f];
+
     }
     
     

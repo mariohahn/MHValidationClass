@@ -47,6 +47,8 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
 @property (nonatomic,strong) UIColor *borderGradientColorUp;
 @property (nonatomic,strong) UIColor *borderGradientColorDow;
 
+@property (nonatomic,strong) UIColor *borderColor;
+
 @property (nonatomic,strong) UIColor *innerShadowColor;
 
 @property (nonatomic,strong) UIFont *labelFont;
