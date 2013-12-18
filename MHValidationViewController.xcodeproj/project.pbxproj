@@ -17,9 +17,9 @@
 		F54807791743C6AE00F5C172 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F54807781743C6AE00F5C172 /* Default@2x.png */; };
 		F548077B1743C6AE00F5C172 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F548077A1743C6AE00F5C172 /* Default-568h@2x.png */; };
 		F548077E1743C6AE00F5C172 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F548077C1743C6AE00F5C172 /* MainStoryboard.storyboard */; };
-		F54807811743C6AE00F5C172 /* UIView+MHValidation.m in Sources */ = {isa = PBXBuildFile; fileRef = F54807801743C6AE00F5C172 /* UIView+MHValidation.m */; };
 		F54807901743DEEC00F5C172 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F548078F1743DEEC00F5C172 /* QuartzCore.framework */; };
 		F54AA357178FF64F00126134 /* ValidationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F54AA356178FF64F00126134 /* ValidationViewController.m */; };
+		F561ED541861B6CA007DCD4C /* UIView+MHValidation.m in Sources */ = {isa = PBXBuildFile; fileRef = F561ED531861B6CA007DCD4C /* UIView+MHValidation.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,11 +37,11 @@
 		F54807781743C6AE00F5C172 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		F548077A1743C6AE00F5C172 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		F548077D1743C6AE00F5C172 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
-		F548077F1743C6AE00F5C172 /* UIView+MHValidation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIView+MHValidation.h"; sourceTree = "<group>"; };
-		F54807801743C6AE00F5C172 /* UIView+MHValidation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIView+MHValidation.m"; sourceTree = "<group>"; };
 		F548078F1743DEEC00F5C172 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		F54AA355178FF64F00126134 /* ValidationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ValidationViewController.h; sourceTree = "<group>"; };
 		F54AA356178FF64F00126134 /* ValidationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ValidationViewController.m; sourceTree = "<group>"; };
+		F561ED521861B6CA007DCD4C /* UIView+MHValidation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIView+MHValidation.h"; path = "MHValidation/UIView+MHValidation.h"; sourceTree = "<group>"; };
+		F561ED531861B6CA007DCD4C /* UIView+MHValidation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+MHValidation.m"; path = "MHValidation/UIView+MHValidation.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,8 +93,8 @@
 				F54807731743C6AE00F5C172 /* AppDelegate.h */,
 				F54807741743C6AE00F5C172 /* AppDelegate.m */,
 				F548077C1743C6AE00F5C172 /* MainStoryboard.storyboard */,
-				F548077F1743C6AE00F5C172 /* UIView+MHValidation.h */,
-				F54807801743C6AE00F5C172 /* UIView+MHValidation.m */,
+				F561ED521861B6CA007DCD4C /* UIView+MHValidation.h */,
+				F561ED531861B6CA007DCD4C /* UIView+MHValidation.m */,
 				F54AA355178FF64F00126134 /* ValidationViewController.h */,
 				F54AA356178FF64F00126134 /* ValidationViewController.m */,
 				F548076B1743C6AE00F5C172 /* Supporting Files */,
@@ -184,7 +184,7 @@
 			files = (
 				F54807711743C6AE00F5C172 /* main.m in Sources */,
 				F54807751743C6AE00F5C172 /* AppDelegate.m in Sources */,
-				F54807811743C6AE00F5C172 /* UIView+MHValidation.m in Sources */,
+				F561ED541861B6CA007DCD4C /* UIView+MHValidation.m in Sources */,
 				F54AA357178FF64F00126134 /* ValidationViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
