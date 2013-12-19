@@ -216,6 +216,7 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
  *
  *  @param padding is the space between the last object on the view and the end of the scrollview
  */
+
 -(void)MHAutoContentSizeForScrollViewWithPadding:(CGFloat)padding;
 /**
  *  Use it to shake your Objects. If you set shouldShakeNonValidateObjects to Yes MHValidation shakes the objects automatically
