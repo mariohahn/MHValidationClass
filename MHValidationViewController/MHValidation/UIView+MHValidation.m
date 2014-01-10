@@ -262,7 +262,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     while (![[view superview] isEqual:self]) {
         view = [view superview];
     }
-    CGRect frame = [view convertRect:[view frame] toView:self];
+    CGRect frame = [view convertRect:[obj frame] toView:view.superview];
     return frame;
 }
 
@@ -508,9 +508,12 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     [self setContentOffsetForFirstresponder:firstResponder andKeyBoardHeight:keyBoardHeight];
     
 }
--(void)setContentOffsetForFirstresponder:(id)firstResponder andKeyBoardHeight:(float)keyBoardHeight{
+-(void)setContentOffsetForFirstresponder:(id)firstResponder
+                       andKeyBoardHeight:(float)keyBoardHeight{
     UIScrollView *scroll = (UIScrollView*)self;
-    if ((([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5)<0) {
+    
+    CGRect rectForFirstResponder = [self determineFrameForObject:firstResponder];
+    if (((rectForFirstResponder.origin.y+ rectForFirstResponder.size.height)- self.bounds.size.height+keyBoardHeight+5)<0) {
         if (OSVersion >=7) {
             [scroll setContentOffset:CGPointMake(0,-[self calculateContentInset]) animated:YES];
         }else{
@@ -518,9 +521,10 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
         }
     }else{
         [UIView animateWithDuration:0.35 animations:^{
-            [scroll setContentOffset:CGPointMake(0,([firstResponder frame].origin.y+ [firstResponder frame].size.height)- self.bounds.size.height+keyBoardHeight+5) animated:NO];
+            [scroll setContentOffset:CGPointMake(0,(rectForFirstResponder.origin.y+ rectForFirstResponder.size.height)- self.bounds.size.height+keyBoardHeight+5) animated:NO];
         }];
     }
+    
 }
 
 
