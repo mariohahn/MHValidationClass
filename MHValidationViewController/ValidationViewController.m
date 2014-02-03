@@ -97,6 +97,9 @@
      ****************************************************************************************************************************/
     [self.scrollView setShowNextAndPrevSegmentedControl:YES];
     
+    
+    [self.scrollView setShouldSaveTextInput:YES];
+    
 }
 
 -(void)validateButtonAction{

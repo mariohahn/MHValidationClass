@@ -14,6 +14,7 @@
 
 
 
+NSString * const SAVE_TEXT_INPUT_OBJECTS_IDENTIFIER = @"SAVE_TEXT_INPUT_OBJECTS_IDENTIFIER";
 NSString * const SHAKE_OBJECTS_IDENTIFIER = @"SHAKE_OBJECTS_IDENTIFIER";
 NSString * const CLASS_OBJECTS_IDENTIFIER = @"CLASS_OBJECTS_IDENTIFIER";
 NSString * const ENABLE_NEXTPREV_IDENTIFIER = @"ENABLE_NEXTPREV_IDENTIFIER";
@@ -199,19 +200,30 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
 @end
 
 
-
 @implementation UIView (MHValidation)
 @dynamic classObjects;
 @dynamic showNextAndPrevSegmentedControl;
 @dynamic shouldShakeNonValidateObjects;
 @dynamic textObjectsCustomization;
 @dynamic shouldEnableNextObjectSelectionWithEnter;
+@dynamic shouldSaveTextInput;
 
 - (void)willMoveToWindow:(UIWindow *)newWindow {
     if (newWindow == nil) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
 }
+
+
+
+
+-(void)setShouldSaveTextInput:(BOOL)shouldSaveTextInput{
+    objc_setAssociatedObject(self, &SAVE_TEXT_INPUT_OBJECTS_IDENTIFIER, [NSNumber numberWithBool:shouldSaveTextInput], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+-(BOOL)shouldSaveTextInput{
+    return [objc_getAssociatedObject(self, &SAVE_TEXT_INPUT_OBJECTS_IDENTIFIER) boolValue];
+}
+
 //SHAKE OBEJCTS
 -(void)setShouldEnableNextObjectSelectionWithEnter:(BOOL)shouldEnableNextObjectSelectionWithEnter{
     objc_setAssociatedObject(self, &SHOULDENABLENEXTOBJECTSELECTIONWITHENTER, [NSNumber numberWithBool:shouldEnableNextObjectSelectionWithEnter], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -258,6 +270,10 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
 
 
 - (CGRect)determineFrameForObject:(id)obj {
+    if ([obj superview] == self) {
+        return [obj frame];
+    }
+    
     UIView *view = (UIView*)obj;
     while (![[view superview] isEqual:self]) {
         view = [view superview];
@@ -976,8 +992,10 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                 stringForMail = [stringForMail stringByAppendingString:[NSString stringWithFormat:@"<br /><br />%@:         %@",@"status",@"new" ]];
                 isFirstRegistration =YES;
             }
-            [[NSUserDefaults standardUserDefaults]setObject:dictMail forKey:[NSString stringWithFormat:@"MHValidationStorage%@",NSStringFromClass([[self findViewController] class])] ];
-            [[NSUserDefaults standardUserDefaults ]synchronize];
+            if (self.shouldSaveTextInput) {
+                [[NSUserDefaults standardUserDefaults]setObject:dictMail forKey:[NSString stringWithFormat:@"MHValidationStorage%@",NSStringFromClass([[self findViewController] class])] ];
+                [[NSUserDefaults standardUserDefaults ]synchronize];
+            }
             SuccessBlock(stringForMail,dictMail,fields,isFirstRegistration);
         }
     }

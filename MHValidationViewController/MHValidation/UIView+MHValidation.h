@@ -159,6 +159,12 @@ typedef NS_ENUM(NSUInteger, MHTextObjectsCustomizationStyle) {
  */
 @property (nonatomic) BOOL shouldEnableNextObjectSelectionWithEnter;
 
+/**
+ *  Default is NO. Saves the textInput for accessibilityIdentifier.
+ */
+@property (nonatomic) BOOL shouldSaveTextInput;
+
+
 
 @property (nonatomic,copy) MHTextObjectsCustomization *textObjectsCustomization;
 
