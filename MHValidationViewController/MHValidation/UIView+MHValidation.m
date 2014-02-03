@@ -462,26 +462,23 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
 
 
 -(void)keyboardWillShow:(NSNotification*)not{
-    
-    
-    
     if (![not userInfo]) {
-        
-        
-        
-        if (self.showNextAndPrevSegmentedControl) {
             [self setCustomization:self.textObjectsCustomization
                         forObjects:@[[self findFirstResponderOnView:self] ]
                          withStyle:MHTextObjectsCustomizationStyleSelected];
             id firstResponder = [self findFirstResponderOnView:self];
+        
             if (![firstResponder inputAccessoryView]) {
                 [firstResponder becomeFirstResponder];
                 
+                
                 UIToolbar *toolBar = [self toolbarInit];
                 [toolBar sizeToFit];
-                [firstResponder setInputAccessoryView:toolBar];
-                if ([firstResponder isKindOfClass:[UITextView class]]) {
-                    [self endEditing:YES];
+                if(self.showNextAndPrevSegmentedControl){
+                    [firstResponder setInputAccessoryView:toolBar];
+                    if ([firstResponder isKindOfClass:[UITextView class]]) {
+                        [self endEditing:YES];
+                    }
                 }
             }
             [self searchForObjectsOfClass:self.classObjects
@@ -496,8 +493,6 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                                  [self disableSegment:MHSelectionTypeNext];
                              }
                          }];
-            
-        }
     }else{
         if ([self isKindOfClass:[UIScrollView class]]) {
             CGRect keyborad = [[[not userInfo]objectForKey:@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
@@ -1063,9 +1058,11 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                         [(UITextView*)field setDelegate:self];
                     }
                     if (![field inputAccessoryView]) {
-                        UIToolbar *toolBar = [self toolbarInit];
-                        [toolBar sizeToFit];
-                        [field setInputAccessoryView:toolBar];
+                        if (self.showNextAndPrevSegmentedControl) {
+                            UIToolbar *toolBar = [self toolbarInit];
+                            [toolBar sizeToFit];
+                            [field setInputAccessoryView:toolBar];
+                        }
                     }
                 }
             }

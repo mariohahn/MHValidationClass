@@ -96,7 +96,7 @@
      Shows a SegmentedControl With a Next And Prev Item
      ****************************************************************************************************************************/
     [self.scrollView setShowNextAndPrevSegmentedControl:YES];
-    
+    [self.scrollView setShouldEnableNextObjectSelectionWithEnter:YES];
     
     [self.scrollView setShouldSaveTextInput:YES];
     
