@@ -463,36 +463,34 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
 
 -(void)keyboardWillShow:(NSNotification*)not{
     if (![not userInfo]) {
-            [self setCustomization:self.textObjectsCustomization
-                        forObjects:@[[self findFirstResponderOnView:self] ]
-                         withStyle:MHTextObjectsCustomizationStyleSelected];
-            id firstResponder = [self findFirstResponderOnView:self];
+        [self setCustomization:self.textObjectsCustomization
+                    forObjects:@[[self findFirstResponderOnView:self] ]
+                     withStyle:MHTextObjectsCustomizationStyleSelected];
+        id firstResponder = [self findFirstResponderOnView:self];
         
-            if (![firstResponder inputAccessoryView]) {
-                [firstResponder becomeFirstResponder];
-                
-                
-                UIToolbar *toolBar = [self toolbarInit];
-                [toolBar sizeToFit];
-                if(self.showNextAndPrevSegmentedControl){
-                    [firstResponder setInputAccessoryView:toolBar];
-                    if ([firstResponder isKindOfClass:[UITextView class]]) {
-                        [self endEditing:YES];
-                    }
-                }
+        if (![firstResponder inputAccessoryView]) {
+            [firstResponder becomeFirstResponder];
+            
+            
+            UIToolbar *toolBar = [self toolbarInit];
+            [toolBar sizeToFit];
+            
+            if(self.showNextAndPrevSegmentedControl){
+                [firstResponder setInputAccessoryView:toolBar];
             }
-            [self searchForObjectsOfClass:self.classObjects
-                   selectNextOrPrevObject:MHSelectionTypeCurrent
-                         foundObjectBlock:^(id object,
-                                            MHSelectedObjectType objectType
-                                            ) {
-                             
-                             if (objectType == MHSelectedObjectTypeFirst) {
-                                 [self disableSegment:MHSelectionTypePrev];
-                             }else if(objectType == MHSelectedObjectTypeLast){
-                                 [self disableSegment:MHSelectionTypeNext];
-                             }
-                         }];
+        }
+        [self searchForObjectsOfClass:self.classObjects
+               selectNextOrPrevObject:MHSelectionTypeCurrent
+                     foundObjectBlock:^(id object,
+                                        MHSelectedObjectType objectType
+                                        ) {
+                         
+                         if (objectType == MHSelectedObjectTypeFirst) {
+                             [self disableSegment:MHSelectionTypePrev];
+                         }else if(objectType == MHSelectedObjectTypeLast){
+                             [self disableSegment:MHSelectionTypeNext];
+                         }
+                     }];
     }else{
         if ([self isKindOfClass:[UIScrollView class]]) {
             CGRect keyborad = [[[not userInfo]objectForKey:@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
@@ -650,7 +648,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                 default:
                     break;
             }
-
+            
             [object setFont:detail.labelFont];
             [object setTextColor:detail.labelColor];
             if([object respondsToSelector:@selector(placeholder)]){
@@ -730,10 +728,17 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     
     
     NSDictionary *dict  =[[NSUserDefaults standardUserDefaults]objectForKey:[NSString stringWithFormat:@"MHValidationStorage%@",NSStringFromClass([[self findViewController] class])]];
-    if (dict) {
-        for (id object in allObjects) {
-            if ([object isKindOfClass:[UITextField class]] || [object isKindOfClass:[UITextView class]]) {
+    for (id object in allObjects) {
+        if ([object isKindOfClass:[UITextField class]] || [object isKindOfClass:[UITextView class]]) {
+            if (dict) {
                 [object setText:dict[[object accessibilityIdentifier]]];
+            }
+            if ([object isKindOfClass:[UITextView class]]) {
+                if (self.showNextAndPrevSegmentedControl) {
+                    UIToolbar *toolBar = [self toolbarInit];
+                    [toolBar sizeToFit];
+                    [object setInputAccessoryView:toolBar];
+                }
             }
         }
     }
@@ -784,14 +789,14 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
         defaultCustomization.borderGradientColorUp = [UIColor clearColor];
         defaultCustomization.cornerRadius = 3;
         defaultCustomization.borderColor = [UIColor lightGrayColor];
-
+        
         
         nonValidCustomization.innerShadowColor = [UIColor clearColor];
         nonValidCustomization.borderGradientColorDow = [UIColor clearColor];
         nonValidCustomization.borderGradientColorUp = [UIColor clearColor];
         nonValidCustomization.cornerRadius = 3;
         nonValidCustomization.borderColor = [UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f];
-
+        
         
         
         selectedCustomization.innerShadowColor = [UIColor clearColor];
@@ -799,7 +804,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
         selectedCustomization.borderGradientColorUp = [UIColor clearColor];
         selectedCustomization.cornerRadius = 3;
         selectedCustomization.borderColor = [UIColor colorWithRed:0.06f green:0.47f blue:0.18f alpha:1.00f];
-
+        
     }
     
     
