@@ -474,9 +474,11 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
             
             UIToolbar *toolBar = [self toolbarInit];
             [toolBar sizeToFit];
-            
             if(self.showNextAndPrevSegmentedControl){
                 [firstResponder setInputAccessoryView:toolBar];
+                if ([firstResponder isKindOfClass:[UITextView class]]) {
+                    [self endEditing:YES];
+                }
             }
         }
         [self searchForObjectsOfClass:self.classObjects
@@ -493,18 +495,24 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                      }];
     }else{
         if ([self isKindOfClass:[UIScrollView class]]) {
-            CGRect keyborad = [[[not userInfo]objectForKey:@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
+            CGRect keyboard = [[[not userInfo]objectForKey:@"UIKeyboardFrameEndUserInfoKey"] CGRectValue];
+            
+            if([UIApplication sharedApplication].statusBarOrientation != UIInterfaceOrientationPortrait){
+                if (keyboard.size.height > keyboard.size.width){
+                    keyboard = CGRectMake(0, 0, keyboard.size.height, keyboard.size.width);
+                }
+            }
+            
             UIScrollView *sv = (UIScrollView*)self;
             [self MHAutoContentSizeForScrollViewWithPadding:10];
             if (OSVersion >=7) {
-                [sv setContentInset:UIEdgeInsetsMake([self calculateContentInset], 0, keyborad.size.height, 0)];
-                [sv setScrollIndicatorInsets:UIEdgeInsetsMake([self calculateContentInset], 0, keyborad.size.height, 0)];
+                [sv setContentInset:UIEdgeInsetsMake([self calculateContentInset], 0, keyboard.size.height, 0)];
+                [sv setScrollIndicatorInsets:UIEdgeInsetsMake([self calculateContentInset], 0, keyboard.size.height, 0)];
             }else{
-                [sv setContentInset:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
-                [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, keyborad.size.height, 0)];
-                
+                [sv setContentInset:UIEdgeInsetsMake(0, 0, keyboard.size.height, 0)];
+                [sv setScrollIndicatorInsets:UIEdgeInsetsMake(0, 0, keyboard.size.height, 0)];
             }
-            [self adjustContentOffsetWithKeyBoardHeight:keyborad.size.height];
+            [self adjustContentOffsetWithKeyBoardHeight:keyboard.size.height];
         }
     }
 }
@@ -728,17 +736,10 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     
     
     NSDictionary *dict  =[[NSUserDefaults standardUserDefaults]objectForKey:[NSString stringWithFormat:@"MHValidationStorage%@",NSStringFromClass([[self findViewController] class])]];
-    for (id object in allObjects) {
-        if ([object isKindOfClass:[UITextField class]] || [object isKindOfClass:[UITextView class]]) {
-            if (dict) {
+    if (dict) {
+        for (id object in allObjects) {
+            if ([object isKindOfClass:[UITextField class]] || [object isKindOfClass:[UITextView class]]) {
                 [object setText:dict[[object accessibilityIdentifier]]];
-            }
-            if ([object isKindOfClass:[UITextView class]]) {
-                if (self.showNextAndPrevSegmentedControl) {
-                    UIToolbar *toolBar = [self toolbarInit];
-                    [toolBar sizeToFit];
-                    [object setInputAccessoryView:toolBar];
-                }
             }
         }
     }
@@ -873,12 +874,15 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                                                                       target:nil
                                                                       action:nil]];
     
-    UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-                                                                              target:self
-                                                                              action:@selector(dismissInputView)];
-    [doneItem setTintColor:[UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f]];
+    if (!MHISIPAD) {
+        UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                                  target:self
+                                                                                  action:@selector(dismissInputView)];
+        [doneItem setTintColor:[UIColor colorWithRed:0.92f green:0.17f blue:0.27f alpha:1.00f]];
+        
+        [barItems addObject:doneItem];
+    }
     
-    [barItems addObject:doneItem];
     [toolbar setItems:barItems animated:NO];
     return toolbar;
 }
@@ -1007,7 +1011,6 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
         for(UIView * view in [(UIScrollView*)self subviews]){
             rect = CGRectUnion(rect, view.frame);
         }
-        
         [(UIScrollView*)self setContentSize:CGSizeMake(rect.size.width, rect.size.height+padding)];
     }else{
         NSLog(@"You can only set the ContentSize for ScrollViews");
