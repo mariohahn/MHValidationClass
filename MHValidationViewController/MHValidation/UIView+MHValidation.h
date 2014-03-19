@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#define OSVersion [[[UIDevice currentDevice] systemVersion] floatValue]
+#define MHVOSVersion [[[UIDevice currentDevice] systemVersion] floatValue]
+#define MHVISIPAD ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
 
 
 static NSString * const MHValidationRegexEmail = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";

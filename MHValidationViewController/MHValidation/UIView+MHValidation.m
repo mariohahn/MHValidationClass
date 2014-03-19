@@ -424,7 +424,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     if ([self isKindOfClass:[UIScrollView class]]) {
         UIScrollView *sv = (UIScrollView*)self;
         [UIView animateWithDuration:0.3 animations:^{
-            if (OSVersion >=7) {
+            if (MHVOSVersion >=7) {
                 [sv setContentInset:UIEdgeInsetsMake([self calculateContentInset], 0, 0, 0)];
                 [sv setScrollIndicatorInsets:UIEdgeInsetsMake([self calculateContentInset], 0, 0, 0)];
             }else{
@@ -505,7 +505,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
             
             UIScrollView *sv = (UIScrollView*)self;
             [self MHAutoContentSizeForScrollViewWithPadding:10];
-            if (OSVersion >=7) {
+            if (MHVOSVersion >=7) {
                 [sv setContentInset:UIEdgeInsetsMake([self calculateContentInset], 0, keyboard.size.height, 0)];
                 [sv setScrollIndicatorInsets:UIEdgeInsetsMake([self calculateContentInset], 0, keyboard.size.height, 0)];
             }else{
@@ -531,7 +531,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
     
     CGRect rectForFirstResponder = [self determineFrameForObject:firstResponder];
     if (((rectForFirstResponder.origin.y+ rectForFirstResponder.size.height)- self.bounds.size.height+keyBoardHeight+5)<0) {
-        if (OSVersion >=7) {
+        if (MHVOSVersion >=7) {
             [scroll setContentOffset:CGPointMake(0,-[self calculateContentInset]) animated:YES];
         }else{
             [scroll setContentOffset:CGPointMake(0,0) animated:YES];
@@ -784,7 +784,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                                           placeHolderColor:[UIColor darkGrayColor]
                                                  labelFont:[UIFont systemFontOfSize:12]];
     
-    if (OSVersion >=7) {
+    if (MHVOSVersion >=7) {
         defaultCustomization.innerShadowColor = [UIColor clearColor];
         defaultCustomization.borderGradientColorDow = [UIColor clearColor];
         defaultCustomization.borderGradientColorUp = [UIColor clearColor];
@@ -874,7 +874,7 @@ NSString * const SHOULDENABLENEXTOBJECTSELECTIONWITHENTER = @"SHOULDENABLENEXTOB
                                                                       target:nil
                                                                       action:nil]];
     
-    if (!MHISIPAD) {
+    if (!MHVISIPAD) {
         UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                   target:self
                                                                                   action:@selector(dismissInputView)];
